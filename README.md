@@ -38,16 +38,16 @@ bs.optimal.rank_specific_all(200)
 ## Find Best Play Example:
 Given a hand of a spades jack, a clubs queen, and a hearts 3, my PC generated psuedorandom combitions of 12 more cards from 2 decks and counted the number of occurances of various combitions to figure out the best BS poker calls.
 
-<img src="SpecificHandResult.png" height="400" width="600" >
+<img src="SpecificHandResult.png" height="600" width="750" >
 
 
 ## General Results:
 The program generated psuedorandom hands of 15 cards from 1 deck and counted the number of occurrances of the following from 100000 trials. Note: this is the chance of there existing any kind/flush/straight/straightflush rather than the chance of a specific one.   Results are as follows.
 
-<img src="GeneralRankings.png" height="600" width="700" >
+<img src="GeneralRankings.png" height="600" width="750" >
 
 
 ## Specific Results:
 The program generated psuedorandom hands of 15 cards with 3 known (5000 trials) from one deck.  For each hand and each category (kind/flush/straightflush/straight), the program found the BS call with the highest chance based on the known cards, and then counted the number of occurrances of that specific call. Results are as follows.
 
-<img src="SpecificRankings.png" height="600" width="700" >
+<img src="SpecificRankings.png" height="600" width="750" >
