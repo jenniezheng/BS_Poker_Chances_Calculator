@@ -481,6 +481,7 @@ def find_best_play(num_decks,num_cards,hand):
     for res in results:
         print("%s is %.3f percent" %(res[1],res[0]*100))
 
+
 def rank_specific_all(num_trials=100):
     num_decks=1
     num_cards=15
@@ -508,9 +509,6 @@ def rank_specific_all(num_trials=100):
     ranking.sort()
     for tup in ranking:
         print("%.3f percent chance: %s" %(tup[0]*100,tup[1]))
-
-
-
 
 
 rank_general_chances()
