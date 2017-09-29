@@ -1,6 +1,11 @@
 import random
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
+plt.rcdefaults()
+import numpy as np
+
+
 class convert():
     @staticmethod
     def card_num_to_str(card_num):
@@ -33,32 +38,35 @@ class convert():
     @staticmethod
     def card_str_to_nums(card):
         suit_str,card_str,deck=card
+        suit_str=suit_str.lower()
         suit_num=-1
         card_num=-1
-        if suit_str=='Spades':
+        if suit_str=='spades' or suit_str=='spade':
            suit_num=0
-        elif suit_str=='Clubs':
+        elif suit_str=='clubs' or suit_str=='club':
            suit_num=1
-        elif suit_str=='Diamonds':
+        elif suit_str=='diamonds' or suit_str=='diamond':
            suit_num=2
-        elif suit_str=='Hearts':
+        elif suit_str=='hearts' or suit_str=='heart' :
            suit_num=3
         else:
-            raise ValueError('Invalid suit!')
-
-        if card_str=='Jack':
+            raise ValueError('Invalid suit!',suit_str)
+        if(type(card_str)==str):
+            card_str=card_str.lower()
+        if card_str=='jack':
             card_num=9
-        elif card_num=='Queen':
+        elif card_str=='queen':
             card_num=10
-        elif card_num=='King':
+        elif card_str=='king':
             card_num=11
-        elif card_num=='Ace':
+        elif card_str=='ace':
             card_num=12
         else:
+            card_num=int(card_str)
             if(card_num>=2 and card_num<=10):
                 card_num=card_str-2
             else:
-                raise ValueError('Invalid card str!')
+                raise ValueError('Invalid card str!',card_str)
 
         return (suit_num,card_num,deck)
 
@@ -351,7 +359,7 @@ class optimal():
             prob1=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,num_trials,poker_hands.hasFlushOfSuitWithHigh,kwargs)
             kwargs={"length":l,"mysuit":suit,"high":12}
             prob2=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,num_trials,poker_hands.hasFlushOfSuitWithHigh,kwargs)
-            descript="{0} flush with Ace or hand high".format(l)
+            descript="{0} long flush, specified high".format(l)
             if(prob1>prob2):
                 results.append((prob1,descript))
             else:
@@ -362,7 +370,7 @@ class optimal():
             high=convert.card_num_to_str(best_straight_low+l-1)
             kwargs={"length":l,"low":best_straight_low}
             prob=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,num_trials,poker_hands.hasStraightWithLow,kwargs)
-            descript="{0} straight with specific high".format(l,high)
+            descript="{0} long straight, specified high".format(l,high)
             results.append((prob,descript))
 
         for l in range(5,11):
@@ -371,7 +379,7 @@ class optimal():
             suit=convert.suit_num_to_str(best_suit)
             kwargs={"length":l,"low":best_low_index,"mysuit":best_suit}
             prob=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,num_trials,poker_hands.hasStraightFlushWithLow,kwargs)
-            descript="{0} straight flush with specific high and suit".format(l)
+            descript="{0} long straight flush, specified high and suit".format(l)
             results.append((prob,descript))
 
         kind=top_calls.top_specific_kind(my_hand)
@@ -379,7 +387,7 @@ class optimal():
         for l in range(2,9):
             kwargs={"length":l,"n":kind}
             prob=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,num_trials,poker_hands.hasSpecificOfKind,kwargs)
-            descript="{0} of a kind with specific kind".format(l)
+            descript="{0} of a kind, specified kind".format(l)
             results.append((prob,descript))
 
         """
@@ -403,30 +411,32 @@ class optimal():
         for l in range(5,11):
             kwargs={"length":l}
             prob=heuristic.heuristic_calc_general(num_decks,num_cards,trials,poker_hands.hasStraightFlush,kwargs)
-            descript="Probability of {0} straight flush".format(l)
+            descript="{0} long straight flush".format(l)
             results.append((prob,descript))
 
         for l in range(5,11):
             kwargs={"length":l}
             prob=heuristic.heuristic_calc_general(num_decks,num_cards,trials,poker_hands.hasStraight,kwargs)
-            descript="Probability of {0} straight".format(l)
+            descript="{0} long straight".format(l)
             results.append((prob,descript))
 
         for l in range(2,9):
             kwargs={"length":l}
             prob=heuristic.heuristic_calc_general(num_decks,num_cards,trials,poker_hands.hasOfKind,kwargs)
-            descript="Probability of {0} of a kind".format(l)
+            descript="{0} of a kind".format(l)
             results.append((prob,descript))
 
         for l in range(5,12):
             kwargs={"length":l}
             prob=heuristic.heuristic_calc_general(num_decks,num_cards,trials,poker_hands.hasFlush,kwargs)
-            descript="Probability of {0} flush".format(l)
+            descript="{0} long flush".format(l)
             results.append((prob,descript))
 
         results.sort()
         for res in results:
             print("%s is %.3f percent" %(res[1],res[0]*100))
+
+        plot.bar_chart("General Rankings",results,.001)
 
         return results
 
@@ -443,12 +453,14 @@ class optimal():
         #descript,prob
         for l in range(5,12):
             suit,high=top_calls.top_suit_and_high(my_hand)
+            high_str=convert.card_num_to_str(high)
+            suit_str=convert.suit_num_to_str(suit)
             kwargs={"length":l,"mysuit":suit,"high":high}
             prob1=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,trials,poker_hands.hasFlushOfSuitWithHigh,kwargs)
-            descript1="Probability of {0} flush with hand high".format(l)
+            descript1="{0} long {2} flush, {1} high".format(l,high_str,suit_str)
             kwargs={"length":l,"mysuit":suit,"high":12}
             prob2=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,trials,poker_hands.hasFlushOfSuitWithHigh,kwargs)
-            descript2="Probability of {0} flush with Ace high".format(l)
+            descript2="{0} long {1} flush, Ace high".format(l,suit_str)
             if(prob1>prob2):
                 results.append((prob1,descript1))
             else:
@@ -459,7 +471,7 @@ class optimal():
             high=convert.card_num_to_str(best_straight_low+l-1)
             kwargs={"length":l,"low":best_straight_low}
             prob=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,trials,poker_hands.hasStraightWithLow,kwargs)
-            descript="Probability of {0} straight with high {1}".format(l,high)
+            descript="{0} long straight, high {1}".format(l,high)
             results.append((prob,descript))
 
         for l in range(5,11):
@@ -468,19 +480,24 @@ class optimal():
             suit=convert.suit_num_to_str(best_suit)
             kwargs={"length":l,"low":best_low_index,"mysuit":best_suit}
             prob=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,trials,poker_hands.hasStraightFlushWithLow,kwargs)
-            descript="Probability of {0} straight flush with high {1} and suit {2}".format(l,high,suit)
+            descript="{0} long straight {2} flush, high {1}".format(l,high,suit)
             results.append((prob,descript))
 
         kind=top_calls.top_specific_kind(my_hand)
         for l in range(2,9):
             kwargs={"length":l,"n":kind}
             prob=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,10000,poker_hands.hasSpecificOfKind,kwargs)
-            descript="Probability of {0} of kind {1}".format(l,kind)
+            descript="{0} of a kind {1}".format(l,kind)
             results.append((prob,descript))
 
         results.sort()
+
+        results=results[::-1]
+
         for res in results:
-            print("%s is %.3f percent" %(res[1],res[0]*100))
+            print("%s : %.3f percent chance" %(res[1],res[0]*100))
+
+        plot.bar_chart("Probabilities Given Hand",results,.01)
 
     @staticmethod
     def rank_specific_all(num_trials=100):
@@ -489,12 +506,12 @@ class optimal():
         known_cards=3
         probs = {}
         probs = defaultdict(lambda:0, probs)
-        print("Know %d cards of %d in %d set(s)" %(known_cards,num_cards,num_decks))
+        #print("Know %d cards of %d in %d set(s)" %(known_cards,num_cards,num_decks))
         my_cards=cards.get_full_set(num_decks)
         for trial in range(num_trials):
-            print("Calculating trial",trial)
+            print("Calculating trial "+str(trial))
             hand=set(cards.rand_set(my_cards,known_cards))
-            cards.print_card_set(hand)
+            #cards.print_card_set(hand)
             results=optimal.rankSpecificChancesWithHand(num_decks,num_cards,hand)
 
             for x in range(len(results)):
@@ -511,6 +528,40 @@ class optimal():
         for tup in ranking:
             print("%.3f percent chance: %s" %(tup[0]*100,tup[1]))
 
+        plot.bar_chart("Specific Rankings",ranking,.001,.35)
+
+class plot():
+    @staticmethod
+    def bar_chart(title,results,cutoff,left=.3):
+        plt.rcdefaults()
+        fig, ax = plt.subplots()
+        probs=[]
+        descripts=[]
+        for result in results:
+            prob,descript=result
+            if(prob<cutoff):
+                continue
+            probs.append(prob*100)
+            descripts.append(descript)
+
+        myrange = np.arange(len(probs))
+
+        ax.barh(myrange, probs, align='center',
+            color='cyan', ecolor='black')
+        ax.set_yticks(myrange)
+        ax.set_yticklabels(descripts)
+
+        for label in (ax.get_xticklabels() + ax.get_yticklabels()):
+            label.set_fontsize(6)
+
+        ax.invert_yaxis()  # labels read top-to-bottom
+        ax.set_xlabel("Probability")
+        ax.set_title(title)
+        plt.gcf().subplots_adjust(left=left)
+        plt.show()
+
+
 if __name__ == "__main__":
-    print("Ranking specific chances")
-    optimal.rank_specific_all()
+    optimal.rank_specific_all(100)
+    #optimal.find_best_play(2,12,[("Spades","Jack",0),("Clubs","Queen",0),("Hearts",3,0)],10000)
+    #optimal.rank_general_chances(10000)
