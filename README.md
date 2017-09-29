@@ -42,12 +42,12 @@ Given a hand of a spades jack, a clubs queen, and a hearts 3, my PC generated ps
 
 
 ## General Results:
-My PC generated psuedorandom hands of 15 cards from 1 deck and counted the number of occurrances of the following from 100000 trials. Note: this is the chance of there existing any kind/flush/straight/straightflush rather than the chance of a specific one.   Results are as follows.
+The program generated psuedorandom hands of 15 cards from 1 deck and counted the number of occurrances of the following from 100000 trials. Note: this is the chance of there existing any kind/flush/straight/straightflush rather than the chance of a specific one.   Results are as follows.
 
 <img src="GeneralRankings.png" height="600" width="700" >
 
 
 ## Specific Results:
-My PC generated psuedorandom hands of 15 cards with 3 known (5000 trials) from one deck.  For each hand and each category (kind/flush/straightflush/straight), the program found the BS call with the highest chance based on the known cards, and then counted the number of occurrances of that specific call. Results are as follows.
+The program generated psuedorandom hands of 15 cards with 3 known (5000 trials) from one deck.  For each hand and each category (kind/flush/straightflush/straight), the program found the BS call with the highest chance based on the known cards, and then counted the number of occurrances of that specific call. Results are as follows.
 
 <img src="SpecificRankings.png" height="600" width="700" >
