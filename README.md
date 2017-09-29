@@ -50,7 +50,7 @@ My PC generated psuedorandom hands of 15 cards from 1 deck and counted the numbe
 - Probability of 2 of a kind is 100.000 percent
 
 ## Specific Results:
-My PC generated psuedorandom hands of 15 cards with 3 known (5000 trials).  For each hand and each category (kind/flush/straightflush/straight), the program found the BS call with the highest chance based on the known cards, and then counted the number of occurrances of that specific call. Results are as follows.
+My PC generated psuedorandom hands of 15 cards with 3 known (5000 trials) from one deck.  For each hand and each category (kind/flush/straightflush/straight), the program found the BS call with the highest chance based on the known cards, and then counted the number of occurrances of that specific call. Results are as follows.
 - 0.003 percent chance: 8 of a kind with specific kind
 - 0.018 percent chance: 11 flush with Ace or hand high
 - 0.043 percent chance: 10 straight flush with specific high and suit
