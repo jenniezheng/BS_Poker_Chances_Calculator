@@ -486,8 +486,9 @@ class optimal():
         kind=top_calls.top_specific_kind(my_hand)
         for l in range(2,9):
             kwargs={"length":l,"n":kind}
+            kind_converted=convert.card_num_to_str(kind)
             prob=heuristic.heuristic_calc_with_hand(my_hand,num_decks,num_cards,10000,poker_hands.hasSpecificOfKind,kwargs)
-            descript="{0} of a kind {1}".format(l,kind)
+            descript="{0} of a kind {1}".format(l,kind_converted)
             results.append((prob,descript))
 
         results.sort()
@@ -562,6 +563,6 @@ class plot():
 
 
 if __name__ == "__main__":
-    optimal.rank_specific_all(100)
-    #optimal.find_best_play(2,12,[("Spades","Jack",0),("Clubs","Queen",0),("Hearts",3,0)],10000)
+    #optimal.rank_specific_all(100)
+    optimal.find_best_play(2,12,[("Spades","Jack",0),("Clubs","Queen",0),("Hearts",3,0)],10000)
     #optimal.rank_general_chances(10000)
