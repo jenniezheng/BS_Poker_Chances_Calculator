@@ -1188,7 +1188,7 @@ var Bar_Graph = function (_React$Component2) {
         'section',
         { className: 'graph' },
         results.map(function (result) {
-          return React.createElement(Bar, { percent: result[0], description: result[1] });
+          return React.createElement(Bar, { percent: result[0].toFixed(3), description: result[1] });
         })
       )
     );

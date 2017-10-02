@@ -889,7 +889,7 @@ class Bar_Graph extends React.Component {
       </div>
       <section className="graph">
         { results.map(function(result){
-          return <Bar percent={result[0]} description={result[1]} />;
+          return <Bar percent={result[0].toFixed(3)} description={result[1]} />;
         }) }
       </section>
     </div>
