@@ -1,3 +1,11 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  overflow-x: hidden;
+}
+
 .jumbotron {
   background: #cdd2d6;
   margin-bottom: 0;
@@ -38,6 +46,7 @@
 .navbar-nav {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: flex-end;
 }
 .navbar-nav .nav-link {
@@ -162,21 +171,22 @@
 .hand_choices #myhand .cardset {
   flex-wrap: wrap;
 }
-.hand_choices .card {
+
+.card {
   width: 25px;
   margin: 1px;
 }
-.hand_choices .card p {
+.card p {
   font-size: 1em;
 }
+
 @media screen and (min-width: 750px) {
-  .hand_choices .card {
+  .card {
     width: 50px;
     margin: 2px;
     font-size: 2em;
   }
 }
-
 .form-inline label.mr-sm-2 {
   font-size: 1em !important;
 }

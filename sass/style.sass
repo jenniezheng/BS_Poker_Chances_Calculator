@@ -1,3 +1,10 @@
+html,body
+  width: 100%
+  height: 100%
+  margin: 0px
+  padding: 0px
+  overflow-x: hidden
+
 //gradients
 @mixin gradient_horizontal($colors...)
   background: blue /* For browsers that do not support gradients */
@@ -14,8 +21,8 @@
     color: #24272B
   p
     color: #24272B
-  
-.card 
+
+.card
   background: #24272B
   width: 50px
   text-align: center
@@ -25,12 +32,13 @@
     color: #24272B
     font-size: 2em
     margin: 0
-    
 
-  
+
+
 .navbar
   background: #004BA8
   padding: 3%  5%  0%  5%
+
 .navbar-brand
   font-size: 2em
   background: #07070A
@@ -40,6 +48,7 @@
 .navbar-nav
   display: flex
   flex-direction: row
+  flex-wrap: wrap
   justify-content: flex-end
   .nav-link
     color: lighten(#3E78B2,25%) !important
@@ -50,14 +59,15 @@
       color: lighten(#3E78B2,60%)  !important
   a
     margin-left: 10px
-  .active 
+  .active
     color: lighten(#3E78B2,100%) !important
-    
+
+
 
 .footer
   background: #004BA8
   padding: 3%  5%  0%  5%
-  color: lighten(#3E78B2,25%) 
+  color: lighten(#3E78B2,25%)
   display: flex
   flex-direction: row
   justify-content: space-between
@@ -75,8 +85,8 @@
         .fa
           color: lighten(#3E78B2,60%)  !important
   .fa
-    color: lighten(#3E78B2,25%) 
-  
+    color: lighten(#3E78B2,25%)
+
 .bar
   $color: #004BA8
   @include gradient_horizontal(darken($color,40%),lighten($color,40%))
@@ -101,24 +111,24 @@
 @media screen and (max-width: 550px)
   .bar
     font-size: .65em
-.bar_container 
+.bar_container
   //skill bar decoration
   //might consider making the skill bars a bit fancier
   line-height: 30px
   margin-bottom: 2px
   color: white
   font-size: 1.4em
-  
-  
+
+
 .num_input
   width: 90px !important
-  
+
 .card
   background: white
   p
     color: #24272B
-    
- 
+
+
 .cardset
   background: none
   padding-bottom: 1px
@@ -136,17 +146,17 @@
   #myhand
     .cardset
       flex-wrap: wrap
+.card
+  width: 25px
+  margin: 1px
+  p
+    font-size: 1em
+@media screen and (min-width: 750px)
   .card
-    width: 25px
-    margin: 1px
-    p 
-      font-size: 1em
-  @media screen and (min-width: 750px)
-    .card
-      width: 50px
-      margin: 2px
-      p 
-      font-size: 2em
+    width: 50px
+    margin: 2px
+    p
+    font-size: 2em
 
 .form-inline
   label.mr-sm-2
