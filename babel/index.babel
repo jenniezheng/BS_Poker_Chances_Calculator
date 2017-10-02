@@ -916,8 +916,10 @@ class Hand_Options extends React.Component{
   }
 
   cardAdded(num,suit){
-    if(this.state.hand.length>=13)
-      return
+    if(this.state.hand.length>=default_cards){
+      alert('Hand cannot be larger than number of total cards')
+    }
+      
     this.state.hand.decks=default_decks
     this.state.hand.safe_add(new Card(num,suit))
     this.setState({hand:this.state.hand})
@@ -935,9 +937,14 @@ class Hand_Options extends React.Component{
   render(){
     return <div className='hand_options jumbotron'> <div className="hand_choices">
       <h1>Hand</h1>
+      <p>Add and remove cards from your hand by clicking on the cards. You can hold as many of the same card as the number of decks you have.</p>
+      <div id='myhand'>
        <HandCardSetIcon cb={this.cardRemoved.bind(this)} cards={this.state.hand.cards} />
+        </div>
       <br/>
-      <button className='btn btn-success'  onClick={this.run.bind(this)}>Calculate</button>
+      <div className='handbtn-wrapper'>
+      <button className=' btn btn-success'  onClick={this.run.bind(this)}>Calculate</button>
+        </div>
       <br/>
       <br/>
       <HandCardSetIcon cb={this.cardAdded.bind(this)} cards={default_hand_choices.cards.slice(0,13)} />
@@ -961,13 +968,10 @@ class Deck_Options extends React.Component{
   }
 
   clicked(){
-    if(this.state.cards <5 || this.state.cards > this.state.decks*52){
-      alert('Error: invalid number of total cards')
-    }
-
-    else if(this.state.known <0 > this.state.known > this.state.cards ){
-      alert('Error: invalid number of known cards')
-    }
+    if(this.state.cards <5)
+      alert('Error: total cards must be at least 5')
+    else if( this.state.cards > this.state.decks*52)
+      alert('Error: total cards cannot be more than number of decks * 52')
     else {
       let newState=this.state
       this.props.callbackParent(newState)
@@ -1002,6 +1006,12 @@ class Deck_Options extends React.Component{
         : <option value="3">3</option>
     let d4=(default_decks==4) ? <option selected value="4">4</option>
         : <option value="4">4</option>
+     let d5=(default_decks==8) ? <option selected value="8">8</option>
+        : <option value="8">8</option>
+      let d6=(default_decks==32) ? <option selected value="32">32</option>
+        : <option value="32">32</option>
+       let d7=(default_decks==128) ? <option selected value="128">128</option>
+        : <option value="128">128</option>
     
     let t1=(default_trials==100) ? <option selected value="100">100</option>
         : <option value="100">100</option>
@@ -1014,6 +1024,7 @@ class Deck_Options extends React.Component{
     
     return <div className='deck_options jumbotron'>
       <h1>Deck Options</h1>
+    <p>What's the total number of cards possessed by all players? How many decks are within play? How many trials to run?</p>
       <div className="form-inline deck">
           <label className="mr-sm-2" for="inlineFormInput">Total</label>
         <input defaultValue={default_cards} onChange={this.handleCardsChange.bind(this)} type="number" className="num_input form-control mb-2 mr-sm-2 mb-sm-0" />
@@ -1024,6 +1035,9 @@ class Deck_Options extends React.Component{
           {d2}
           {d3}
           {d4}
+          {d5}
+          {d6}
+          {d7}
         </select>
 
         <label className="mr-sm-2" for="inlineFormCustomSelect">Trials</label>
@@ -1035,6 +1049,8 @@ class Deck_Options extends React.Component{
         </select>
         <button className='settings btn btn-success' onClick={this.clicked.bind(this)}> Set </button>
       </div>
+        
+      
     </div>
   }
 }
@@ -1049,8 +1065,11 @@ class Known_Option extends React.Component{
   }
 
   clicked(){
-    if(this.state.known <= 0 || this.state.known > default_cards ){
-      alert('Error: invalid number of known cards')
+    if(this.state.known <= 0){
+      alert('Error: known cards must be greater than 0')
+    } 
+    else if( this.state.known > default_cards ){
+      alert('Error: known cards cannot be greater than total cards')
     }
   else 
     this.props.callbackParent(default_known)
@@ -1065,10 +1084,15 @@ class Known_Option extends React.Component{
   render() {
     return <div className='deck_options jumbotron'>
       <h1>Known Cards</h1>
+      
+        <p>Out of the total cards, how many do you know about?</p>
+      
       <div className="form-inline deck">
-        <label className="mr-sm-2" for="inlineFormInput">Known</label>
+        
+        <label className="mr-sm-2" >Known</label>
         <input defaultValue={default_known} onChange={this.handleKnownCardsChange.bind(this)} type="number" className="num_input form-control mb-2 mr-sm-2 mb-sm-0" />
         <button className='settings btn btn-success' onClick={this.clicked.bind(this)}> Set </button>
+        
       </div>
     </div>
   }

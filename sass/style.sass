@@ -13,10 +13,7 @@
   h1
     color: #24272B
   p
-    font-size: 1.5em !important
     color: #24272B
-  li
-    font-size: 1.5em !important
   
 .card 
   background: #24272B
@@ -29,14 +26,8 @@
     font-size: 2em
     margin: 0
     
- 
-.cardset
-  background: none
-  padding-bottom: 1px
-  display: flex
-  flex-direction: row
-  justify-content: flex-start
-  margin-left: 0
+
+  
 .navbar
   background: #004BA8
   padding: 3%  5%  0%  5%
@@ -45,19 +36,24 @@
   background: #07070A
   color: #3E78B2 !important
   padding: .1em
+
 .navbar-nav
   display: flex
   flex-direction: row
-  justify-content: flex-start
+  justify-content: flex-end
   .nav-link
     color: lighten(#3E78B2,25%) !important
     font-size: 1.2em
+    @media screen and (max-width: 700px)
+      font-size: .85em
     &:hover
       color: lighten(#3E78B2,60%)  !important
   a
     margin-left: 10px
   .active 
     color: lighten(#3E78B2,100%) !important
+    
+
 .footer
   background: #004BA8
   padding: 3%  5%  0%  5%
@@ -65,7 +61,6 @@
   display: flex
   flex-direction: row
   justify-content: space-between
-  margin: 0
   h3
     font-size: .9em
     display: inline-block
@@ -100,7 +95,12 @@
   .bar_description
     margin-top: 4px
     font-size: 1.2em
-  
+@media screen and (max-width: 700px)
+  .bar
+    font-size: .85em
+@media screen and (max-width: 550px)
+  .bar
+    font-size: .65em
 .bar_container 
   //skill bar decoration
   //might consider making the skill bars a bit fancier
@@ -108,10 +108,6 @@
   margin-bottom: 2px
   color: white
   font-size: 1.4em
-  
-
-.deck_options
-  font-size: 1.2em !important
   
   
 .num_input
@@ -121,17 +117,44 @@
   background: white
   p
     color: #24272B
+    
+ 
+.cardset
+  background: none
+  padding-bottom: 1px
+  display: flex
+  flex-direction: row
+  justify-content: center
+  margin-left: auto
 .hand_options
   padding: 5%
+  .handbtn-wrapper
+    display: flex
+    align-items: center
+    justify-content: center
 .hand_choices
+  #myhand
+    .cardset
+      flex-wrap: wrap
   .card
-    width: 40px
+    width: 25px
     margin: 1px
-  p 
-    font-size: 1.5em
-  @media screen and (min-width: 400px)
     p 
-      font-size: 5em
+      font-size: 1em
+  @media screen and (min-width: 750px)
     .card
-      width: 60px
+      width: 50px
       margin: 2px
+      p 
+      font-size: 2em
+
+.form-inline
+  label.mr-sm-2
+    font-size: 1em !important
+  @media screen and (max-width: 650px)
+    label.mr-sm-2
+      font-size: .7em !important
+    select.custom-select,input.mr-sm-2
+      font-size: .7em !important
+    input.mr-sm-2
+      width: 70px !important

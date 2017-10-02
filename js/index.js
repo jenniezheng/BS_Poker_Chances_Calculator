@@ -1223,7 +1223,10 @@ var Hand_Options = function (_React$Component3) {
   }
 
   Hand_Options.prototype.cardAdded = function cardAdded(num, suit) {
-    if (this.state.hand.length >= 13) return;
+    if (this.state.hand.length >= default_cards) {
+      alert('Hand cannot be larger than number of total cards');
+    }
+
     this.state.hand.decks = default_decks;
     this.state.hand.safe_add(new Card(num, suit));
     this.setState({ hand: this.state.hand });
@@ -1251,12 +1254,25 @@ var Hand_Options = function (_React$Component3) {
           null,
           'Hand'
         ),
-        React.createElement(HandCardSetIcon, { cb: this.cardRemoved.bind(this), cards: this.state.hand.cards }),
+        React.createElement(
+          'p',
+          null,
+          'Add and remove cards from your hand by clicking on the cards. You can hold as many of the same card as the number of decks you have.'
+        ),
+        React.createElement(
+          'div',
+          { id: 'myhand' },
+          React.createElement(HandCardSetIcon, { cb: this.cardRemoved.bind(this), cards: this.state.hand.cards })
+        ),
         React.createElement('br', null),
         React.createElement(
-          'button',
-          { className: 'btn btn-success', onClick: this.run.bind(this) },
-          'Calculate'
+          'div',
+          { className: 'handbtn-wrapper' },
+          React.createElement(
+            'button',
+            { className: ' btn btn-success', onClick: this.run.bind(this) },
+            'Calculate'
+          )
         ),
         React.createElement('br', null),
         React.createElement('br', null),
@@ -1288,11 +1304,7 @@ var Deck_Options = function (_React$Component4) {
   }
 
   Deck_Options.prototype.clicked = function clicked() {
-    if (this.state.cards < 5 || this.state.cards > this.state.decks * 52) {
-      alert('Error: invalid number of total cards');
-    } else if (this.state.known < 0 > this.state.known > this.state.cards) {
-      alert('Error: invalid number of known cards');
-    } else {
+    if (this.state.cards < 5) alert('Error: total cards must be at least 5');else if (this.state.cards > this.state.decks * 52) alert('Error: total cards cannot be more than number of decks * 52');else {
       var newState = this.state;
       this.props.callbackParent(newState);
     }
@@ -1353,6 +1365,33 @@ var Deck_Options = function (_React$Component4) {
       { value: '4' },
       '4'
     );
+    var d5 = default_decks == 8 ? React.createElement(
+      'option',
+      { selected: true, value: '8' },
+      '8'
+    ) : React.createElement(
+      'option',
+      { value: '8' },
+      '8'
+    );
+    var d6 = default_decks == 32 ? React.createElement(
+      'option',
+      { selected: true, value: '32' },
+      '32'
+    ) : React.createElement(
+      'option',
+      { value: '32' },
+      '32'
+    );
+    var d7 = default_decks == 128 ? React.createElement(
+      'option',
+      { selected: true, value: '128' },
+      '128'
+    ) : React.createElement(
+      'option',
+      { value: '128' },
+      '128'
+    );
 
     var t1 = default_trials == 100 ? React.createElement(
       'option',
@@ -1400,6 +1439,11 @@ var Deck_Options = function (_React$Component4) {
         'Deck Options'
       ),
       React.createElement(
+        'p',
+        null,
+        'What\'s the total number of cards possessed by all players? How many decks are within play? How many trials to run?'
+      ),
+      React.createElement(
         'div',
         { className: 'form-inline deck' },
         React.createElement(
@@ -1419,7 +1463,10 @@ var Deck_Options = function (_React$Component4) {
           d1,
           d2,
           d3,
-          d4
+          d4,
+          d5,
+          d6,
+          d7
         ),
         React.createElement(
           'label',
@@ -1461,8 +1508,10 @@ var Known_Option = function (_React$Component5) {
   }
 
   Known_Option.prototype.clicked = function clicked() {
-    if (this.state.known <= 0 || this.state.known > default_cards) {
-      alert('Error: invalid number of known cards');
+    if (this.state.known <= 0) {
+      alert('Error: known cards must be greater than 0');
+    } else if (this.state.known > default_cards) {
+      alert('Error: known cards cannot be greater than total cards');
     } else this.props.callbackParent(default_known);
   };
 
@@ -1482,11 +1531,16 @@ var Known_Option = function (_React$Component5) {
         'Known Cards'
       ),
       React.createElement(
+        'p',
+        null,
+        'Out of the total cards, how many do you know about?'
+      ),
+      React.createElement(
         'div',
         { className: 'form-inline deck' },
         React.createElement(
           'label',
-          { className: 'mr-sm-2', 'for': 'inlineFormInput' },
+          { className: 'mr-sm-2' },
           'Known'
         ),
         React.createElement('input', { defaultValue: default_known, onChange: this.handleKnownCardsChange.bind(this), type: 'number', className: 'num_input form-control mb-2 mr-sm-2 mb-sm-0' }),
