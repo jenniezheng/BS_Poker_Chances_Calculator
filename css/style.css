@@ -1,0 +1,166 @@
+.jumbotron {
+  background: #cdd2d6;
+  margin-bottom: 0;
+  padding: 3% 5% 3% 5%;
+}
+.jumbotron h1 {
+  color: #24272B;
+}
+.jumbotron p {
+  font-size: 1.5em !important;
+  color: #24272B;
+}
+.jumbotron li {
+  font-size: 1.5em !important;
+}
+
+.card {
+  background: #24272B;
+  width: 50px;
+  text-align: center;
+  padding: 1px;
+  margin: 1px;
+}
+.card p {
+  color: #24272B;
+  font-size: 2em;
+  margin: 0;
+}
+
+.cardset {
+  background: none;
+  padding-bottom: 1px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin-left: 0;
+}
+
+.navbar {
+  background: #004BA8;
+  padding: 3% 5% 0% 5%;
+}
+
+.navbar-brand {
+  font-size: 2em;
+  background: #07070A;
+  color: #3E78B2 !important;
+  padding: 0.1em;
+}
+
+.navbar-nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.navbar-nav .nav-link {
+  color: #95b8da !important;
+  font-size: 1.2em;
+}
+.navbar-nav .nav-link:hover {
+  color: white !important;
+}
+.navbar-nav a {
+  margin-left: 10px;
+}
+.navbar-nav .active {
+  color: white !important;
+}
+
+.footer {
+  background: #004BA8;
+  padding: 3% 5% 0% 5%;
+  color: #95b8da;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 0;
+}
+.footer h3 {
+  font-size: 0.9em;
+  display: inline-block;
+}
+.footer .footer_links {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-right: 0;
+}
+.footer .footer_links li {
+  margin-left: 1em;
+}
+.footer .footer_links li a:hover .fa {
+  color: white !important;
+}
+.footer .fa {
+  color: #95b8da;
+}
+
+.bar {
+  background: blue;
+  background: -webkit-linear-gradient(left, black, #75b3ff);
+  background: -o-linear-gradient(right, black, #75b3ff);
+  background: -moz-linear-gradient(right, black, #75b3ff);
+  background: linear-gradient(to right, black, #75b3ff);
+  white-space: nowrap;
+  padding-left: 10px;
+  border-radius: 40px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.bar_graph {
+  padding: 10% 5%;
+  padding-top: 3em;
+  background: #24272B;
+}
+.bar_graph h1, .bar_graph p {
+  color: #cedeee !important;
+}
+.bar_graph .bar_description {
+  margin-top: 4px;
+  font-size: 1.2em;
+}
+
+.bar_container {
+  line-height: 30px;
+  margin-bottom: 2px;
+  color: white;
+  font-size: 1.4em;
+}
+
+.deck_options {
+  font-size: 1.2em !important;
+}
+
+.num_input {
+  width: 90px !important;
+}
+
+.card {
+  background: white;
+}
+.card p {
+  color: #24272B;
+}
+
+.hand_options {
+  padding: 5%;
+}
+
+.hand_choices .card {
+  width: 40px;
+  margin: 1px;
+}
+.hand_choices p {
+  font-size: 1.5em;
+}
+@media screen and (min-width: 400px) {
+  .hand_choices p {
+    font-size: 5em;
+  }
+  .hand_choices .card {
+    width: 60px;
+    margin: 2px;
+  }
+}

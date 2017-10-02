@@ -1,0 +1,137 @@
+//gradients
+@mixin gradient_horizontal($colors...)
+  background: blue /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(left, $colors) /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(right, $colors) /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(right, $colors) /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to right, $colors) /* Standard syntax */
+
+.jumbotron
+  background: lighten(#4A525A,50%)
+  margin-bottom: 0
+  padding: 3%  5%  3%  5%
+  h1
+    color: #24272B
+  p
+    font-size: 1.5em !important
+    color: #24272B
+  li
+    font-size: 1.5em !important
+  
+.card 
+  background: #24272B
+  width: 50px
+  text-align: center
+  padding: 1px
+  margin: 1px
+  p
+    color: #24272B
+    font-size: 2em
+    margin: 0
+    
+ 
+.cardset
+  background: none
+  padding-bottom: 1px
+  display: flex
+  flex-direction: row
+  justify-content: flex-start
+  margin-left: 0
+.navbar
+  background: #004BA8
+  padding: 3%  5%  0%  5%
+.navbar-brand
+  font-size: 2em
+  background: #07070A
+  color: #3E78B2 !important
+  padding: .1em
+.navbar-nav
+  display: flex
+  flex-direction: row
+  justify-content: flex-start
+  .nav-link
+    color: lighten(#3E78B2,25%) !important
+    font-size: 1.2em
+    &:hover
+      color: lighten(#3E78B2,60%)  !important
+  a
+    margin-left: 10px
+  .active 
+    color: lighten(#3E78B2,100%) !important
+.footer
+  background: #004BA8
+  padding: 3%  5%  0%  5%
+  color: lighten(#3E78B2,25%) 
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+  margin: 0
+  h3
+    font-size: .9em
+    display: inline-block
+  .footer_links
+    display: flex
+    flex-direction: row
+    justify-content: flex-end
+    margin-right: 0
+    li
+      margin-left: 1em
+      a:hover
+        .fa
+          color: lighten(#3E78B2,60%)  !important
+  .fa
+    color: lighten(#3E78B2,25%) 
+  
+.bar
+  $color: #004BA8
+  @include gradient_horizontal(darken($color,40%),lighten($color,40%))
+  white-space: nowrap
+  padding-left: 10px
+  border-radius: 40px
+  text-align: left
+  box-sizing: border-box
+
+.bar_graph
+  padding: 10% 5%
+  padding-top: 3em
+  background: #24272B
+  h1, p
+    color: lighten(#3E78B2,40%)  !important
+  .bar_description
+    margin-top: 4px
+    font-size: 1.2em
+  
+.bar_container 
+  //skill bar decoration
+  //might consider making the skill bars a bit fancier
+  line-height: 30px
+  margin-bottom: 2px
+  color: white
+  font-size: 1.4em
+  
+
+.deck_options
+  font-size: 1.2em !important
+  
+  
+.num_input
+  width: 90px !important
+  
+.card
+  background: white
+  p
+    color: #24272B
+.hand_options
+  padding: 5%
+.hand_choices
+  .card
+    width: 40px
+    margin: 1px
+  p 
+    font-size: 1.5em
+  @media screen and (min-width: 400px)
+    p 
+      font-size: 5em
+    .card
+      width: 60px
+      margin: 2px
