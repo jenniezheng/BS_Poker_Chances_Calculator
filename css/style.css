@@ -40,7 +40,7 @@ html, body {
   font-size: 2em;
   background: #07070A;
   color: #3E78B2 !important;
-  padding: 0.1em;
+  padding: 0 0.5em 0 0.5em;
 }
 
 .navbar-nav {
@@ -109,6 +109,10 @@ html, body {
   box-sizing: border-box;
 }
 
+.graph {
+  padding: 1em 0 1em 0;
+}
+
 .bar_graph {
   padding: 10% 5%;
   padding-top: 3em;
@@ -161,11 +165,6 @@ html, body {
 
 .hand_options {
   padding: 5%;
-}
-.hand_options .handbtn-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .hand_choices #myhand .cardset {

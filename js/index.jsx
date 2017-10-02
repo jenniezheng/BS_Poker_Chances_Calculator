@@ -1,1351 +1,2192 @@
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) {if (window.CP.shouldStopExecution(1)){break;} var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); }
+window.CP.exitedLoop(1);
+ } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 if (!String.prototype.format) {
-  String.prototype.format = function() {
+  String.prototype.format = function () {
     var args = arguments;
-    return this.replace(/{(\d+)}/g, function(match, number) {
-      return typeof args[number] != 'undefined'
-        ? args[number]
-      : match
-      ;
+    return this.replace(/{(\d+)}/g, function (match, number) {
+      return typeof args[number] != 'undefined' ? args[number] : match;
     });
   };
 }
 
-class Card {
-  constructor(num_num,suit_num) {
-    if(num_num>=13 || num_num<0){
-      throw 'Error invalid num number '+num_num;
+var Card = function () {
+  function Card(num_num, suit_num) {
+    _classCallCheck(this, Card);
+
+    if (num_num >= 13 || num_num < 0) {
+      throw 'Error invalid num number ' + num_num;
     }
-    if(suit_num>=4 || suit_num<0){
-      throw 'Error invalid suit number '+suit_num;
+    if (suit_num >= 4 || suit_num < 0) {
+      throw 'Error invalid suit number ' + suit_num;
     }
     this.num = num_num;
     this.suit = suit_num;
   }
 
-  get suit_str(){
-    return Card.suit_num_to_str(this.suit)
-  }
-
-  get num_str(){
-    return Card.card_num_to_str(this.num)
-  }
-
-  static suit_num_to_str(num){
+  Card.suit_num_to_str = function suit_num_to_str(num) {
     switch (num) {
-      case 0: return 'Spades'
-      case 1: return 'Clubs'
-      case 2: return 'Diamonds'
-      case 3: return 'Hearts'
-               }
-  }
+      case 0:
+        return 'Spades';
+      case 1:
+        return 'Clubs';
+      case 2:
+        return 'Diamonds';
+      case 3:
+        return 'Hearts';
+    }
+  };
 
-  static card_num_to_str(num){
+  Card.card_num_to_str = function card_num_to_str(num) {
     switch (num) {
-      case 9: return 'Jack'
-      case 10: return 'Queen'
-      case 11: return 'King'
-      case 12: return 'Ace'
-      default: return (num+2).toString()
-               }
-  }
+      case 9:
+        return 'Jack';
+      case 10:
+        return 'Queen';
+      case 11:
+        return 'King';
+      case 12:
+        return 'Ace';
+      default:
+        return (num + 2).toString();
+    }
+  };
 
-  static num_char(num){
+  Card.num_char = function num_char(num) {
     switch (num) {
-      case 9: return 'J'
-      case 10: return 'Q'
-      case 11: return 'K'
-      case 12: return 'A'
-      default: return (num+2).toString()
-               }
+      case 9:
+        return 'J';
+      case 10:
+        return 'Q';
+      case 11:
+        return 'K';
+      case 12:
+        return 'A';
+      default:
+        return (num + 2).toString();
+    }
+  };
+
+  Card.prototype.toString = function toString() {
+    return "{0} of {1}".format(this.num_str, this.suit_str);
+  };
+
+  Card.prototype.valueOf = function valueOf() {
+    return this.num * 10 + this.suit;
+  };
+
+  _createClass(Card, [{
+    key: 'suit_str',
+    get: function get() {
+      return Card.suit_num_to_str(this.suit);
+    }
+  }, {
+    key: 'num_str',
+    get: function get() {
+      return Card.card_num_to_str(this.num);
+    }
+  }]);
+
+  return Card;
+}();
+
+var Card_Set = function () {
+  function Card_Set() {
+    var cards = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+
+    _classCallCheck(this, Card_Set);
+
+    this.cards = cards;
+    this.shuffleCards();
+    this.pointer = 0;
+    this.decks = 1;
   }
 
-  toString(){
-    return "{0} of {1}".format(this.num_str, this.suit_str)
-  }
-
-  valueOf() {
-    return this.num*10+this.suit
-  }
-
-}
-
-
-class Card_Set {
-  constructor(cards=[]) {
-    this.cards=cards
-    this.shuffleCards()
-    this.pointer=0
-    this.decks=1
-  }
-
-  fill_decks_no_shuffle(num_decks){
-    this.decks=num_decks
-    this.cards=[]
-    for(let deck=0;deck<num_decks;deck++){
-      for(let suit_num=0;suit_num<4;suit_num++){
-        for(let num_num=0;num_num<13;num_num++){
-          this.add(new Card(num_num,suit_num))
+  Card_Set.prototype.fill_decks_no_shuffle = function fill_decks_no_shuffle(num_decks) {
+    this.decks = num_decks;
+    this.cards = [];
+    for (var deck = 0; deck < num_decks; deck++) {if (window.CP.shouldStopExecution(4)){break;}
+      for (var suit_num = 0; suit_num < 4; suit_num++) {if (window.CP.shouldStopExecution(3)){break;}
+        for (var num_num = 0; num_num < 13; num_num++) {if (window.CP.shouldStopExecution(2)){break;}
+          this.add(new Card(num_num, suit_num));
         }
+window.CP.exitedLoop(2);
+
+      }
+window.CP.exitedLoop(3);
+
+    }
+window.CP.exitedLoop(4);
+
+  };
+
+  Card_Set.prototype.fill_decks = function fill_decks(num_decks) {
+    this.fill_decks_no_shuffle(num_decks);
+    this.shuffleCards();
+  };
+
+  Card_Set.prototype.safe_add = function safe_add(card) {
+    var count = 0;
+    for (var i = 0; i < this.cards.length; i++) {if (window.CP.shouldStopExecution(5)){break;}
+      if (this.cards[i].valueOf() == card.valueOf()) count += 1;
+    }
+window.CP.exitedLoop(5);
+
+    if (count != this.decks) this.add(card);
+  };
+
+  Card_Set.prototype.add = function add(card) {
+    if (card instanceof Card) this.cards.push(card);else throw 'Error card not instanceof Card';
+  };
+
+  Card_Set.prototype.shuffleCards = function shuffleCards() {
+    for (var i = this.cards.length - 1; i > 0; i--) {if (window.CP.shouldStopExecution(6)){break;}
+      var j = Math.floor(Math.random() * (i + 1));
+      var _ref = [this.cards[j], this.cards[i]];
+      this.cards[i] = _ref[0];
+      this.cards[j] = _ref[1];
+    }
+window.CP.exitedLoop(6);
+
+  };
+
+  Card_Set.prototype.indexOfCard = function indexOfCard(card) {
+    if (card instanceof Card) {
+      for (var i = 0; i < this.cards.length; i++) {if (window.CP.shouldStopExecution(7)){break;}
+        if (this.cards[i].valueOf() == card.valueOf()) return i;
+      }
+window.CP.exitedLoop(7);
+
+      return -1;
+    } else throw 'Error card not instanceof Card';
+  };
+
+  Card_Set.prototype.remove = function remove(card) {
+    var index = this.indexOfCard(card);
+    if (index != -1) this.cards.splice(index, 1);
+  };
+
+  Card_Set.prototype.toString = function toString() {
+    var myString = '';
+    for (var _iterator = this.cards, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(8)){break;}
+      var _ref2;
+
+      if (_isArray) {
+        if (_i >= _iterator.length) break;
+        _ref2 = _iterator[_i++];
+      } else {
+        _i = _iterator.next();
+        if (_i.done) break;
+        _ref2 = _i.value;
+      }
+
+      var card = _ref2;
+
+      myString += card.toString() + '; ';
+    }
+window.CP.exitedLoop(8);
+
+    return myString;
+  };
+
+  Card_Set.prototype.getCards = function getCards(num) {
+    if (num > this.cards.length) throw 'Error tried to get ' + num + ' cards when only ' + this.cards.length + ' cards in set';
+    if (this.pointer + num > this.cards.length) {
+      this.shuffleCards();
+      this.pointer = 0;
+    }
+    var result = new Card_Set(this.cards.slice(this.pointer, this.pointer + num));
+    if (result.length != num) throw 'Wrong length!' + ' Wanted ' + num + ' but got ' + result.length + ' pointer at ' + this.pointer;
+    this.pointer += num;
+    return result;
+  };
+
+  Card_Set.prototype.hasSpecificOfAKind = function hasSpecificOfAKind(length, wanted_num) {
+    var num_of_kind = this.numSpecificOfAKind(wanted_num);
+    return num_of_kind >= length;
+  };
+
+  Card_Set.prototype.numSpecificOfAKind = function numSpecificOfAKind(wanted_num) {
+    var num_of_kind = 0;
+    for (var _iterator2 = this.cards, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(9)){break;}
+      var _ref3;
+
+      if (_isArray2) {
+        if (_i2 >= _iterator2.length) break;
+        _ref3 = _iterator2[_i2++];
+      } else {
+        _i2 = _iterator2.next();
+        if (_i2.done) break;
+        _ref3 = _i2.value;
+      }
+
+      var card = _ref3;
+
+      var num = card.num;
+      if (num == 0 || num == wanted_num) num_of_kind += 1;
+    }
+window.CP.exitedLoop(9);
+
+    return num_of_kind;
+  };
+
+  Card_Set.prototype.hasOfAKind = function hasOfAKind(length) {
+    if (length > this.cards.length) return false;
+    for (var kind = 0; kind < 13; kind++) {if (window.CP.shouldStopExecution(10)){break;}
+      if (this.hasSpecificOfAKind(length, kind)) return true;
+    }
+window.CP.exitedLoop(10);
+return false;
+  };
+
+  Card_Set.prototype.hasFullHouse = function hasFullHouse(triple, double) {
+
+    var num_of_triple = 0;
+    var num_of_double = 0;
+    var num_wild = 0;
+    for (var _iterator3 = this.cards, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(11)){break;}
+      var _ref4;
+
+      if (_isArray3) {
+        if (_i3 >= _iterator3.length) break;
+        _ref4 = _iterator3[_i3++];
+      } else {
+        _i3 = _iterator3.next();
+        if (_i3.done) break;
+        _ref4 = _i3.value;
+      }
+
+      var card = _ref4;
+
+      if (card.num == 0) num_wild += 1;else if (card.num == 1) num_of_double += 1;else num_of_triple += 1;
+    }
+window.CP.exitedLoop(11);
+
+    var missing = Math.max(2 - num_of_double, 0) + Math.max(3 - num_of_triple, 0);
+    return num_wild >= missing;
+  };
+
+  Card_Set.prototype.hasSuitSeperatedTrait = function hasSuitSeperatedTrait(funcStr) {
+    var suitSet = [];
+    for (var i = 0; i < 4; ++i) {if (window.CP.shouldStopExecution(12)){break;}
+      suitSet.push(new Card_Set());
+    }
+window.CP.exitedLoop(12);
+for (var _iterator4 = this.cards, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(14)){break;}
+      var _ref5;
+
+      if (_isArray4) {
+        if (_i4 >= _iterator4.length) break;
+        _ref5 = _iterator4[_i4++];
+      } else {
+        _i4 = _iterator4.next();
+        if (_i4.done) break;
+        _ref5 = _i4.value;
+      }
+
+      var card = _ref5;
+
+      if (card.num == 0) {
+        for (var i = 0; i < 4; ++i) {if (window.CP.shouldStopExecution(13)){break;}
+          suitSet[i].add(card);
+        }
+window.CP.exitedLoop(13);
+
+      } else {
+        suitSet[card.suit].add(card);
       }
     }
-  }
+window.CP.exitedLoop(14);
 
-  fill_decks(num_decks){
-    this.fill_decks_no_shuffle(num_decks)
-    this.shuffleCards()
-  }
 
-  get length(){
-    return this.cards.length
-  }
-
-  safe_add(card){
-    let count=0
-    for (let i=0;i<this.cards.length;i++){
-      if(this.cards[i].valueOf()==card.valueOf())
-        count+=1
+    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {if (window.CP.shouldStopExecution(15)){break;}
+      args[_key - 1] = arguments[_key];
     }
-    if(count!=this.decks)
-      this.add(card)
-  }
-
-  add(card){
-    if(card instanceof Card)
-      this.cards.push(card)
-    else
-      throw 'Error card not instanceof Card'
-  }
-
-  shuffleCards() {
-    for (let i = this.cards.length - 1; i > 0; i--) {
-      let j = Math.floor(Math.random() * (i + 1));
-      [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
-    }
-  }
-
-  indexOfCard(card){
-    if(card instanceof Card){
-      for (let i=0;i<this.cards.length;i++){
-        if(this.cards[i].valueOf()==card.valueOf())
-          return i
-      }
-      return -1
-    }
-    else
-      throw 'Error card not instanceof Card'
-  }
-
-  remove(card){
-    let index= this.indexOfCard(card)
-    if(index!=-1)
-      this.cards.splice( index, 1 );
-  }
-
-  toString(){
-    let myString=''
-    for (let card of this.cards){
-      myString+=card.toString()+'; '
-    }
-    return myString
-  }
-
-  getCards(num){
-    if(num > this.cards.length)
-      throw 'Error tried to get '+num+' cards when only '+this.cards.length+' cards in set'
-    if(this.pointer + num > this.cards.length){
-      this.shuffleCards()
-      this.pointer=0
-    }
-   let result=new Card_Set(this.cards.slice(this.pointer,this.pointer+num))
-    if(result.length != num)
-      throw 'Wrong length!'+' Wanted '+num+' but got '+result.length+' pointer at '+this.pointer
-    this.pointer+=num
-    return result
-  }
-
-  hasSpecificOfAKind(length,wanted_num){
-    let num_of_kind=this.numSpecificOfAKind(wanted_num)
-    return num_of_kind>=length
-  }
-
-  numSpecificOfAKind(wanted_num){
-    let num_of_kind=0
-    for (let card of this.cards){
-      let num = card.num
-      if(num == 0 || num == wanted_num)
-        num_of_kind+=1
-    }
-    return num_of_kind
-  }
-
-  hasOfAKind(length){
-    if(length > this.cards.length)
-      return false
-    for (let kind=0; kind<13; kind++)
-      if(this.hasSpecificOfAKind(length,kind))
-        return true
-    return false
-  }
-
-  hasFullHouse(triple,double){
-
-    let num_of_triple=0
-    let num_of_double=0
-    let num_wild=0
-    for (let card of this.cards){
-      if(card.num==0) num_wild+=1
-      else if (card.num==1) num_of_double+=1
-      else num_of_triple+=1
-    }
-    let missing=Math.max(2-num_of_double,0)+
-        Math.max(3-num_of_triple,0)
-    return num_wild>=missing
-  }
+window.CP.exitedLoop(15);
 
 
-  hasSuitSeperatedTrait(funcStr,...args){
-    let suitSet=[]
-    for(let i=0; i<4; ++i)
-      suitSet.push(new Card_Set())
-    for (let card of this.cards){
-      if(card.num==0){
-        for(let i=0; i<4; ++i)
-          suitSet[i].add(card)
-      }
-      else{
-        suitSet[card.suit].add(card)
-      }
-    }
-    for(let i=0; i<4; ++i) {
-      switch (funcStr){
-        case 'hasSpecificFlushWithoutHigh'  :
-          if(suitSet[i].hasSpecificFlushWithoutHigh(args,i)){
-            return true
+    for (var i = 0; i < 4; ++i) {if (window.CP.shouldStopExecution(16)){break;}
+      switch (funcStr) {
+        case 'hasSpecificFlushWithoutHigh':
+          if (suitSet[i].hasSpecificFlushWithoutHigh(args, i)) {
+            return true;
           }
-          break
-          case 'hasStraight'  :
-          let arg= [...args]
-          if(suitSet[i].hasStraight(arg[0])){
-            return true
+          break;
+        case 'hasStraight':
+          var arg = [].concat(args);
+          if (suitSet[i].hasStraight(arg[0])) {
+            return true;
           }
-          break
-          case 'hasSpecificStraight'  :  if(suitSet[i].hasSpecificStraight(args,i))
-            return true
-          break
-          default:
-          throw 'invalid funcStr'
-                     }
-    }
-    return false
-  }
-
-  hasSpecificFlushWithoutHigh(length,wanted_suit){
-    if(length > this.cards.length)
-      return false
-
-    let suit_count=0
-    for (let card of this.cards){
-      let suit = card.suit
-      let num = card.num
-      if(num == 0 || suit == wanted_suit)
-        suit_count+=1
-    }
-    return suit_count>=length
-  }
-
-  hasFlush(length){
-    if(length > this.cards.length)
-      return false
-    return this.hasSuitSeperatedTrait('hasSpecificFlushWithoutHigh',length)
-  }
-
-  numSpecificFlush(wanted_suit,high){
-    let has_high=false
-    let suit_count=0
-    for (let card of this.cards){
-      let suit = card.suit
-      let num = card.num
-      if(num == 0 || suit == wanted_suit)
-        suit_count+=1
-      if(num == 0 || ( suit == wanted_suit && high == num))
-        has_high=true
-    }
-
-    if(!has_high)
-      return 0
-    return suit_count
-  }
-
-  hasSpecificFlush(length,wanted_suit,high){
-    let count=this.numSpecificFlush(wanted_suit,high)
-    return count>=length
-  }
-
-  hasSpecificHigh(length,high){
-    if(length > this.cards.length)
-      return false
-
-    let count=0
-    let has_high=false
-
-    for (let card of this.cards){
-      if(card.num <= high)
-        count+=1
-      if(card.num==0 || card.num == high )
-        has_high=true
-    }
-    return has_high && count>=length
-  }
-
-  hasSpecificStraight(length,high){
-    if(length > this.cards.length || length > 13)
-      return false
-
-    let low=(high-length+1)%13
-    if(low!=12 && low+length-1>12)
-      return false
-
-    let num_arr = []
-    for(let i=0; i<13; ++i)
-      num_arr.push(false)
-
-    let num_wild=0
-    for (let card of this.cards){
-      if(card.num==0)
-        num_wild+=1
-      else
-        num_arr[card.num]=true
-    }
-
-    for (let x=low; x<low+length; x++)
-      if(!num_arr[x % 13]){
-        num_wild-=1
-        if(num_wild==-1)
-          return false
-      }
-    return true
-  }
-
-  hasStraight(length){
-    if(length > this.cards.length || length > 13)
-      return false
-
-    for (let high=length; high<13; high++){
-      if(this.hasSpecificStraight(length,high)){
-        return true
+          break;
+        case 'hasSpecificStraight':
+          if (suitSet[i].hasSpecificStraight(args, i)) return true;
+          break;
+        default:
+          throw 'invalid funcStr';
       }
     }
+window.CP.exitedLoop(16);
 
-    return false
-  }
+    return false;
+  };
 
-  hasStraightFlush(length){
-    if(length > this.cards.length || length > 13)
-      return false
+  Card_Set.prototype.hasSpecificFlushWithoutHigh = function hasSpecificFlushWithoutHigh(length, wanted_suit) {
+    if (length > this.cards.length) return false;
 
-    if(!this.hasFlush())
-      return false
+    var suit_count = 0;
+    for (var _iterator5 = this.cards, _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(17)){break;}
+      var _ref6;
 
-    return this.hasSuitSeperatedTrait('hasStraight',length)
-  }
+      if (_isArray5) {
+        if (_i5 >= _iterator5.length) break;
+        _ref6 = _iterator5[_i5++];
+      } else {
+        _i5 = _iterator5.next();
+        if (_i5.done) break;
+        _ref6 = _i5.value;
+      }
 
-  hasSpecificStraightFlush(length,suit,high){
-    if(length > this.cards.length || length > 13)
-      return false
+      var card = _ref6;
 
-    if(!this.hasSpecificFlush(length,suit,high)
-       || !this.hasSpecificStraight(length,high))
-      return false
+      var suit = card.suit;
+      var num = card.num;
+      if (num == 0 || suit == wanted_suit) suit_count += 1;
+    }
+window.CP.exitedLoop(17);
 
-    return this.hasSuitSeperatedTrait('hasSpecificStraight',length,high)
-  }
+    return suit_count >= length;
+  };
 
-  top_expected_straight(length){
-    let arr = []
-    for(let i=0; i<13; ++i)
-      arr.push(false)
+  Card_Set.prototype.hasFlush = function hasFlush(length) {
+    if (length > this.cards.length) return false;
+    return this.hasSuitSeperatedTrait('hasSpecificFlushWithoutHigh', length);
+  };
 
-    for (let card of this.cards)
-      if(card.num!=0)
-        arr[card.num]=true
+  Card_Set.prototype.numSpecificFlush = function numSpecificFlush(wanted_suit, high) {
+    var has_high = false;
+    var suit_count = 0;
+    for (var _iterator6 = this.cards, _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(18)){break;}
+      var _ref7;
 
-    let low_index=0
-    let max_length=0
-    let current_length=0
+      if (_isArray6) {
+        if (_i6 >= _iterator6.length) break;
+        _ref7 = _iterator6[_i6++];
+      } else {
+        _i6 = _iterator6.next();
+        if (_i6.done) break;
+        _ref7 = _i6.value;
+      }
+
+      var card = _ref7;
+
+      var suit = card.suit;
+      var num = card.num;
+      if (num == 0 || suit == wanted_suit) suit_count += 1;
+      if (num == 0 || suit == wanted_suit && high == num) has_high = true;
+    }
+window.CP.exitedLoop(18);
+
+
+    if (!has_high) return 0;
+    return suit_count;
+  };
+
+  Card_Set.prototype.hasSpecificFlush = function hasSpecificFlush(length, wanted_suit, high) {
+    var count = this.numSpecificFlush(wanted_suit, high);
+    return count >= length;
+  };
+
+  Card_Set.prototype.hasSpecificHigh = function hasSpecificHigh(length, high) {
+    if (length > this.cards.length) return false;
+
+    var count = 0;
+    var has_high = false;
+
+    for (var _iterator7 = this.cards, _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(19)){break;}
+      var _ref8;
+
+      if (_isArray7) {
+        if (_i7 >= _iterator7.length) break;
+        _ref8 = _iterator7[_i7++];
+      } else {
+        _i7 = _iterator7.next();
+        if (_i7.done) break;
+        _ref8 = _i7.value;
+      }
+
+      var card = _ref8;
+
+      if (card.num <= high) count += 1;
+      if (card.num == 0 || card.num == high) has_high = true;
+    }
+window.CP.exitedLoop(19);
+
+    return has_high && count >= length;
+  };
+
+  Card_Set.prototype.hasSpecificStraight = function hasSpecificStraight(length, high) {
+    if (length > this.cards.length || length > 13) return false;
+
+    var low = (high - length + 1) % 13;
+    if (low != 12 && low + length - 1 > 12) return false;
+
+    var num_arr = [];
+    for (var i = 0; i < 13; ++i) {if (window.CP.shouldStopExecution(20)){break;}
+      num_arr.push(false);
+    }
+window.CP.exitedLoop(20);
+var num_wild = 0;
+    for (var _iterator8 = this.cards, _isArray8 = Array.isArray(_iterator8), _i8 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(21)){break;}
+      var _ref9;
+
+      if (_isArray8) {
+        if (_i8 >= _iterator8.length) break;
+        _ref9 = _iterator8[_i8++];
+      } else {
+        _i8 = _iterator8.next();
+        if (_i8.done) break;
+        _ref9 = _i8.value;
+      }
+
+      var card = _ref9;
+
+      if (card.num == 0) num_wild += 1;else num_arr[card.num] = true;
+    }
+window.CP.exitedLoop(21);
+
+
+    for (var x = low; x < low + length; x++) {if (window.CP.shouldStopExecution(22)){break;}
+      if (!num_arr[x % 13]) {
+        num_wild -= 1;
+        if (num_wild == -1) return false;
+      }
+    }
+window.CP.exitedLoop(22);
+return true;
+  };
+
+  Card_Set.prototype.hasStraight = function hasStraight(length) {
+    if (length > this.cards.length || length > 13) return false;
+
+    for (var high = length; high < 13; high++) {if (window.CP.shouldStopExecution(23)){break;}
+      if (this.hasSpecificStraight(length, high)) {
+        return true;
+      }
+    }
+window.CP.exitedLoop(23);
+
+
+    return false;
+  };
+
+  Card_Set.prototype.hasStraightFlush = function hasStraightFlush(length) {
+    if (length > this.cards.length || length > 13) return false;
+
+    if (!this.hasFlush()) return false;
+
+    return this.hasSuitSeperatedTrait('hasStraight', length);
+  };
+
+  Card_Set.prototype.hasSpecificStraightFlush = function hasSpecificStraightFlush(length, suit, high) {
+    if (length > this.cards.length || length > 13) return false;
+
+    if (!this.hasSpecificFlush(length, suit, high) || !this.hasSpecificStraight(length, high)) return false;
+
+    return this.hasSuitSeperatedTrait('hasSpecificStraight', length, high);
+  };
+
+  Card_Set.prototype.top_expected_straight = function top_expected_straight(length) {
+    var arr = [];
+    for (var i = 0; i < 13; ++i) {if (window.CP.shouldStopExecution(24)){break;}
+      arr.push(false);
+    }
+window.CP.exitedLoop(24);
+for (var _iterator9 = this.cards, _isArray9 = Array.isArray(_iterator9), _i9 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(25)){break;}
+      var _ref10;
+
+      if (_isArray9) {
+        if (_i9 >= _iterator9.length) break;
+        _ref10 = _iterator9[_i9++];
+      } else {
+        _i9 = _iterator9.next();
+        if (_i9.done) break;
+        _ref10 = _i9.value;
+      }
+
+      var card = _ref10;
+
+      if (card.num != 0) arr[card.num] = true;
+    }
+window.CP.exitedLoop(25);
+var low_index = 0;
+    var max_length = 0;
+    var current_length = 0;
     //try start at ace
-    for (let x=12; x<12+length; x++)
-      if(arr[x%13]){
-        current_length+=1
-        if(max_length<=current_length)
-          max_length=current_length
-      }
-
-    for (let x=length-12; x<12; x++){
-      if(arr[x-length])
-        current_length-=1
-      if(arr[x])
-        current_length+=1
-
-      if(max_length<=current_length){
-        max_length=current_length
-        low_index=x-length+1
+    for (var x = 12; x < 12 + length; x++) {if (window.CP.shouldStopExecution(26)){break;}
+      if (arr[x % 13]) {
+        current_length += 1;
+        if (max_length <= current_length) max_length = current_length;
       }
     }
+window.CP.exitedLoop(26);
+for (var x = length - 12; x < 12; x++) {if (window.CP.shouldStopExecution(27)){break;}
+      if (arr[x - length]) current_length -= 1;
+      if (arr[x]) current_length += 1;
+
+      if (max_length <= current_length) {
+        max_length = current_length;
+        low_index = x - length + 1;
+      }
+    }
+window.CP.exitedLoop(27);
+
     //should never be 0
-    if(low_index==0)
-      low_index+=1
-    let high=low_index+length-1
-    return [high,max_length]
-  }
+    if (low_index == 0) low_index += 1;
+    var high = low_index + length - 1;
+    return [high, max_length];
+  };
 
-  top_of_a_kind(){
-    let [first_index,second_index,first_count,second_count]=this.top_of_two_kinds()
+  Card_Set.prototype.top_of_a_kind = function top_of_a_kind() {
+    var _top_of_two_kinds = this.top_of_two_kinds();
 
-    return [first_index,first_count]
-  }
+    var first_index = _top_of_two_kinds[0];
+    var second_index = _top_of_two_kinds[1];
+    var first_count = _top_of_two_kinds[2];
+    var second_count = _top_of_two_kinds[3];
 
-  top_of_two_kinds(){
-    let num_wild=0
-    let num_arr = []
-    for(let i=0; i<13; ++i)
-      num_arr.push(0)
-    for (let card of this.cards)
-      if(card.num!=0)
-        num_arr[card.num]+=1
-    else
-      num_wild+=1
+    return [first_index, first_count];
+  };
 
-    let first_count=0, second_count=0
-    let first_index=0, second_index=0
-    for (let x=0; x<13; ++x)
-      if(num_arr[x]>=first_count){
-        second_count=first_count
-        second_index=first_index
-        first_count=num_arr[x]
-        first_index=x
-      }
-      else if (num_arr[x]>=second_count){
-        second_count=num_arr[x]
-        second_index=x
-      }
-    if(first_index==0)
-      first_index=1
-    if(second_index==0)
-      second_index=1
-    if(first_index==second_index)
-      first_index=(second_index+1)%13
-    return [first_index,second_index,first_count+num_wild,second_count]
-  }
-
-  top_suit(){
-    let num_wild=0
-    let suits=[0,0,0,0]
-    let highs=[0,0,0,0]
-    for (let card of this.cards){
-      if(card.num!=0){
-        suits[card.suit]+=1
-        if(highs[card.suit]<card.num)
-          highs[card.suit]=card.num
-      }
-      else
-        num_wild+=1
+  Card_Set.prototype.top_of_two_kinds = function top_of_two_kinds() {
+    var num_wild = 0;
+    var num_arr = [];
+    for (var i = 0; i < 13; ++i) {if (window.CP.shouldStopExecution(28)){break;}
+      num_arr.push(0);
     }
+window.CP.exitedLoop(28);
+for (var _iterator10 = this.cards, _isArray10 = Array.isArray(_iterator10), _i10 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(29)){break;}
+      var _ref11;
 
-    let max_suit=0
-    let max_suit_count=0
-    for (let x=0; x<4; ++x)
-      if(suits[x]>max_suit_count ||
-         (suits[x]==max_suit_count && highs[max_suit] <= highs[x])){
-        max_suit_count=suits[x]
-        max_suit=x
+      if (_isArray10) {
+        if (_i10 >= _iterator10.length) break;
+        _ref11 = _iterator10[_i10++];
+      } else {
+        _i10 = _iterator10.next();
+        if (_i10.done) break;
+        _ref11 = _i10.value;
       }
-    return [max_suit,highs[max_suit],max_suit_count+num_wild]
-  }
 
-  top_expected_straight_flush(length){
-    let best_suit=0
-    let best_length=0
-    let best_high=0
+      var card = _ref11;
 
-    let suitSet=[]
-    for(let i=0; i<4; ++i)
-      suitSet.push(new Card_Set())
-
-    for (let card of this.cards){
-      if(card.num==0){
-        for(let i=0; i<4; ++i)
-          suitSet[i].add(card)
-      }
-      else{
-        suitSet[card.suit].add(card)
+      if (card.num != 0) num_arr[card.num] += 1;else num_wild += 1;
+    }
+window.CP.exitedLoop(29);
+var first_count = 0,
+        second_count = 0;
+    var first_index = 0,
+        second_index = 0;
+    for (var x = 0; x < 13; ++x) {if (window.CP.shouldStopExecution(30)){break;}
+      if (num_arr[x] >= first_count) {
+        second_count = first_count;
+        second_index = first_index;
+        first_count = num_arr[x];
+        first_index = x;
+      } else if (num_arr[x] >= second_count) {
+        second_count = num_arr[x];
+        second_index = x;
       }
     }
+window.CP.exitedLoop(30);
+if (first_index == 0) first_index = 1;
+    if (second_index == 0) second_index = 1;
+    if (first_index == second_index) first_index = (second_index + 1) % 13;
+    return [first_index, second_index, first_count + num_wild, second_count];
+  };
 
-    for (let x=0; x<4; ++x) {
-      let [high,mlength]=suitSet[x].top_expected_straight(length)
-      if(mlength>best_length){
-        best_length=mlength
-        best_suit=x
-        best_high=high
+  Card_Set.prototype.top_suit = function top_suit() {
+    var num_wild = 0;
+    var suits = [0, 0, 0, 0];
+    var highs = [0, 0, 0, 0];
+    for (var _iterator11 = this.cards, _isArray11 = Array.isArray(_iterator11), _i11 = 0, _iterator11 = _isArray11 ? _iterator11 : _iterator11[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(31)){break;}
+      var _ref12;
+
+      if (_isArray11) {
+        if (_i11 >= _iterator11.length) break;
+        _ref12 = _iterator11[_i11++];
+      } else {
+        _i11 = _iterator11.next();
+        if (_i11.done) break;
+        _ref12 = _i11.value;
+      }
+
+      var card = _ref12;
+
+      if (card.num != 0) {
+        suits[card.suit] += 1;
+        if (highs[card.suit] < card.num) highs[card.suit] = card.num;
+      } else num_wild += 1;
+    }
+window.CP.exitedLoop(31);
+
+
+    var max_suit = 0;
+    var max_suit_count = 0;
+    for (var x = 0; x < 4; ++x) {if (window.CP.shouldStopExecution(32)){break;}
+      if (suits[x] > max_suit_count || suits[x] == max_suit_count && highs[max_suit] <= highs[x]) {
+        max_suit_count = suits[x];
+        max_suit = x;
       }
     }
-    return [best_suit,best_high,best_length]
-  }
+window.CP.exitedLoop(32);
+return [max_suit, highs[max_suit], max_suit_count + num_wild];
+  };
 
-}
+  Card_Set.prototype.top_expected_straight_flush = function top_expected_straight_flush(length) {
+    var best_suit = 0;
+    var best_length = 0;
+    var best_high = 0;
+
+    var suitSet = [];
+    for (var i = 0; i < 4; ++i) {if (window.CP.shouldStopExecution(33)){break;}
+      suitSet.push(new Card_Set());
+    }
+window.CP.exitedLoop(33);
+for (var _iterator12 = this.cards, _isArray12 = Array.isArray(_iterator12), _i12 = 0, _iterator12 = _isArray12 ? _iterator12 : _iterator12[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(35)){break;}
+      var _ref13;
+
+      if (_isArray12) {
+        if (_i12 >= _iterator12.length) break;
+        _ref13 = _iterator12[_i12++];
+      } else {
+        _i12 = _iterator12.next();
+        if (_i12.done) break;
+        _ref13 = _i12.value;
+      }
+
+      var card = _ref13;
+
+      if (card.num == 0) {
+        for (var i = 0; i < 4; ++i) {if (window.CP.shouldStopExecution(34)){break;}
+          suitSet[i].add(card);
+        }
+window.CP.exitedLoop(34);
+
+      } else {
+        suitSet[card.suit].add(card);
+      }
+    }
+window.CP.exitedLoop(35);
 
 
-class Optimal {
-  constructor(cards,decks,trials){
+    for (var x = 0; x < 4; ++x) {if (window.CP.shouldStopExecution(36)){break;}
+      var _suitSet$x$top_expect = suitSet[x].top_expected_straight(length);
+
+      var high = _suitSet$x$top_expect[0];
+      var mlength = _suitSet$x$top_expect[1];
+
+      if (mlength > best_length) {
+        best_length = mlength;
+        best_suit = x;
+        best_high = high;
+      }
+    }
+window.CP.exitedLoop(36);
+
+    return [best_suit, best_high, best_length];
+  };
+
+  _createClass(Card_Set, [{
+    key: 'length',
+    get: function get() {
+      return this.cards.length;
+    }
+  }]);
+
+  return Card_Set;
+}();
+
+var Optimal = function () {
+  function Optimal(cards, decks, trials) {
+    _classCallCheck(this, Optimal);
+
     //alert(cards+' '+decks+' '+trials)
-    this.cards=cards
-    this.decks=decks
-    this.trials=trials
-    this.specific_chances=[]
-    this.specific_chances_hand_length=0
-    this.general_chances=[]
+    this.cards = cards;
+    this.decks = decks;
+    this.trials = trials;
+    this.specific_chances = [];
+    this.specific_chances_hand_length = 0;
+    this.general_chances = [];
   }
-  rank_general_chances() {
-    if(this.general_chances.length!=0)
-      return this.general_chances
-    let cards=this.cards,decks=this.decks,trials=this.trials
-    let results = {}
+
+  Optimal.prototype.rank_general_chances = function rank_general_chances() {
+    if (this.general_chances.length != 0) return this.general_chances;
+    var cards = this.cards,
+        decks = this.decks,
+        trials = this.trials;
+    var results = {};
     //fill results
-    for(let i=2; i<=decks*8; i++){
-      let target=i+" of a kind"
-      results[target]=0
+    for (var i = 2; i <= decks * 8; i++) {if (window.CP.shouldStopExecution(37)){break;}
+      var target = i + " of a kind";
+      results[target] = 0;
     }
+window.CP.exitedLoop(37);
 
-    for(let i=5; i<=cards; i++){
-      let target=i+" long flush"
-      results[target]=0
+
+    for (var i = 5; i <= cards; i++) {if (window.CP.shouldStopExecution(38)){break;}
+      var target = i + " long flush";
+      results[target] = 0;
     }
+window.CP.exitedLoop(38);
 
-    for(let i=5; i<=13; i++){
-      let target=i+" long straight"
-      results[target]=0
+
+    for (var i = 5; i <= 13; i++) {if (window.CP.shouldStopExecution(39)){break;}
+      var target = i + " long straight";
+      results[target] = 0;
     }
+window.CP.exitedLoop(39);
 
-    for(let i=5; i<=13; i++){
-      let target=i+" long straight flush"
-      results[target]=0
+
+    for (var i = 5; i <= 13; i++) {if (window.CP.shouldStopExecution(40)){break;}
+      var target = i + " long straight flush";
+      results[target] = 0;
     }
+window.CP.exitedLoop(40);
 
-    let deck = new Card_Set()
+
+    var deck = new Card_Set();
     //fill up card set
-    deck.fill_decks(decks)
+    deck.fill_decks(decks);
 
-    for (let trial=0; trial<trials; ++trial){
-      let card_set=deck.getCards(cards)
-      let [_,longest_of_kind]=card_set.top_of_a_kind()
-      let [____,__,longest_flush]=card_set.top_suit()
-      let longest_straight=0,longest_straight_flush=0
-      let curr_length=5
-      while(card_set.hasStraight(curr_length)){
-        longest_straight=curr_length
-        curr_length+=1
+    for (var trial = 0; trial < trials; ++trial) {if (window.CP.shouldStopExecution(47)){break;}
+      var card_set = deck.getCards(cards);
+
+      var _card_set$top_of_a_ki = card_set.top_of_a_kind();
+
+      var _ = _card_set$top_of_a_ki[0];
+      var longest_of_kind = _card_set$top_of_a_ki[1];
+
+      var _card_set$top_suit = card_set.top_suit();
+
+      var ____ = _card_set$top_suit[0];
+      var __ = _card_set$top_suit[1];
+      var longest_flush = _card_set$top_suit[2];
+
+      var longest_straight = 0,
+          longest_straight_flush = 0;
+      var curr_length = 5;
+      while (card_set.hasStraight(curr_length)) {if (window.CP.shouldStopExecution(41)){break;}
+        longest_straight = curr_length;
+        curr_length += 1;
       }
+window.CP.exitedLoop(41);
+
       //temp
-      curr_length=5
-      while(card_set.hasStraightFlush(curr_length)){
-        longest_straight_flush=curr_length
-        curr_length+=1
+      curr_length = 5;
+      while (card_set.hasStraightFlush(curr_length)) {if (window.CP.shouldStopExecution(42)){break;}
+        longest_straight_flush = curr_length;
+        curr_length += 1;
       }
-      for(let i=2; i<=longest_of_kind; i++){
-        let target=i+" of a kind"
-        results[target]+=1
-      }
+window.CP.exitedLoop(42);
 
-      for(let i=5; i<=longest_flush; i++){
-        let target=i+" long flush"
-        results[target]+=1
+      for (var i = 2; i <= longest_of_kind; i++) {if (window.CP.shouldStopExecution(43)){break;}
+        var target = i + " of a kind";
+        results[target] += 1;
       }
+window.CP.exitedLoop(43);
 
-      for(let i=5; i<=longest_straight; i++){
-        let target=i+" long straight"
-        results[target]+=1
-      }
 
-      for(let i=5; i<=longest_straight_flush; i++){
-        let target=i+" long straight flush"
-        results[target]+=1
+      for (var i = 5; i <= longest_flush; i++) {if (window.CP.shouldStopExecution(44)){break;}
+        var target = i + " long flush";
+        results[target] += 1;
       }
+window.CP.exitedLoop(44);
+
+
+      for (var i = 5; i <= longest_straight; i++) {if (window.CP.shouldStopExecution(45)){break;}
+        var target = i + " long straight";
+        results[target] += 1;
+      }
+window.CP.exitedLoop(45);
+
+
+      for (var i = 5; i <= longest_straight_flush; i++) {if (window.CP.shouldStopExecution(46)){break;}
+        var target = i + " long straight flush";
+        results[target] += 1;
+      }
+window.CP.exitedLoop(46);
+
     }
+window.CP.exitedLoop(47);
 
-    let arr = [];
-    for (let key in results) {
-      if(results[key]>.001)
-        arr.push( [ results[key]*100.0/trials, key] );
+
+    var arr = [];
+    for (var key in results) {if (window.CP.shouldStopExecution(48)){break;}
+      if (results[key] > .001) arr.push([results[key] * 100.0 / trials, key]);
     }
+window.CP.exitedLoop(48);
 
-    arr.sort(function(x, y) { if (x[0] > y[0]) return 1
-                             else if (x[0]==y[0]) return 0
-                             else return -1
-                            });
 
-    for (let res of arr) {
+    arr.sort(function (x, y) {
+      if (x[0] > y[0]) return 1;else if (x[0] == y[0]) return 0;else return -1;
+    });
+
+    for (var _iterator13 = arr, _isArray13 = Array.isArray(_iterator13), _i13 = 0, _iterator13 = _isArray13 ? _iterator13 : _iterator13[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(49)){break;}
       //if(res[0]>=.01)
       //console.log(res[0]+'% chance '+res[1])
+
+      var _ref14;
+
+      if (_isArray13) {
+        if (_i13 >= _iterator13.length) break;
+        _ref14 = _iterator13[_i13++];
+      } else {
+        _i13 = _iterator13.next();
+        if (_i13.done) break;
+        _ref14 = _i13.value;
+      }
+
+      var res = _ref14;
     }
-    this.general_chances=arr
-    return arr
-  }
+window.CP.exitedLoop(49);
 
-  rank_specific_chances(myknown) {
+    this.general_chances = arr;
+    return arr;
+  };
 
-     if( this.specific_chances_hand_length ==myknown &&
-    this.specific_chances.length!=0 )
-      return this.specific_chances
-    this.specific_ranks_dict={}
+  Optimal.prototype.rank_specific_chances = function rank_specific_chances(myknown) {
 
-    let results=this.specific_ranks_dict
-    results["Full house, specified triple and double"]=0
+    if (this.specific_chances_hand_length == myknown && this.specific_chances.length != 0) return this.specific_chances;
+    this.specific_ranks_dict = {};
+
+    var results = this.specific_ranks_dict;
+    results["Full house, specified triple and double"] = 0;
 
     //fill results
-    for(let i=2; i<=this.decks*8; i++)
-      results[i+" of a kind, specified rank"]=0
-
-    for(let i=5; i<=this.cards; i++){
-      results[i+" long flush, specified suit and own card high"]=0
-      results[i+" long flush, specified suit and Ace high"]=0
+    for (var i = 2; i <= this.decks * 8; i++) {if (window.CP.shouldStopExecution(50)){break;}
+      results[i + " of a kind, specified rank"] = 0;
     }
-
-    for(let i=5; i<=13; i++){
-      results[i+" long straight, specified high"]=0
-      results[i+" long straight flush, specified high"]=0
+window.CP.exitedLoop(50);
+for (var i = 5; i <= this.cards; i++) {if (window.CP.shouldStopExecution(51)){break;}
+      results[i + " long flush, specified suit and own card high"] = 0;
+      results[i + " long flush, specified suit and Ace high"] = 0;
     }
+window.CP.exitedLoop(51);
 
-    let num_hands=Math.sqrt(this.trials);
-    let deck = new Card_Set()
-    deck.fill_decks(this.decks)
+
+    for (var i = 5; i <= 13; i++) {if (window.CP.shouldStopExecution(52)){break;}
+      results[i + " long straight, specified high"] = 0;
+      results[i + " long straight flush, specified high"] = 0;
+    }
+window.CP.exitedLoop(52);
+
+
+    var num_hands = Math.sqrt(this.trials);
+    var deck = new Card_Set();
+    deck.fill_decks(this.decks);
     /**/
-    for (let trial=0; trial<num_hands; ++trial){
-      let card_set = deck.getCards(myknown)
-      this.rank_specific_chances_helper(card_set)
+    for (var trial = 0; trial < num_hands; ++trial) {if (window.CP.shouldStopExecution(53)){break;}
+      var card_set = deck.getCards(myknown);
+      this.rank_specific_chances_helper(card_set);
     }
+window.CP.exitedLoop(53);
 
-    let total_trials=Math.floor(num_hands)*Math.floor(num_hands)
-    let arr = []
 
-    for (let key in  this.specific_ranks_dict) {
-      if(results[key]>.001)
-        arr.push( [ this.specific_ranks_dict[key]*100.0/total_trials, key] );
+    var total_trials = Math.floor(num_hands) * Math.floor(num_hands);
+    var arr = [];
+
+    for (var key in this.specific_ranks_dict) {if (window.CP.shouldStopExecution(54)){break;}
+      if (results[key] > .001) arr.push([this.specific_ranks_dict[key] * 100.0 / total_trials, key]);
     }
+window.CP.exitedLoop(54);
 
-    arr.sort(function(x, y) { if (x[0] > y[0]) return 1
-                             else if (x[0]==y[0]) return 0
-                             else return -1
-                            })
 
-    for (let res of arr) {
-      if(res[0]>=.01)
-        console.log('spe '+res[0]+'% chance '+res[1])
+    arr.sort(function (x, y) {
+      if (x[0] > y[0]) return 1;else if (x[0] == y[0]) return 0;else return -1;
+    });
+
+    for (var _iterator14 = arr, _isArray14 = Array.isArray(_iterator14), _i14 = 0, _iterator14 = _isArray14 ? _iterator14 : _iterator14[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(55)){break;}
+      var _ref15;
+
+      if (_isArray14) {
+        if (_i14 >= _iterator14.length) break;
+        _ref15 = _iterator14[_i14++];
+      } else {
+        _i14 = _iterator14.next();
+        if (_i14.done) break;
+        _ref15 = _i14.value;
+      }
+
+      var res = _ref15;
+
+      if (res[0] >= .01) console.log('spe ' + res[0] + '% chance ' + res[1]);
     }
-    this.specific_chances=arr
-    this.specific_chances_hand_length =myknown
-    return arr
+window.CP.exitedLoop(55);
 
-    return [[.4,'HI']]
-  }
+    this.specific_chances = arr;
+    this.specific_chances_hand_length = myknown;
+    return arr;
 
-  rank_specific_chances_helper(hand) {
-    if(this.cards<hand.length)
-      throw 'Error: hand too large'
+    return [[.4, 'HI']];
+  };
 
-    let cards=hand, decks=this.decks,trials=Math.sqrt(this.trials)
+  Optimal.prototype.rank_specific_chances_helper = function rank_specific_chances_helper(hand) {
+    if (this.cards < hand.length) throw 'Error: hand too large';
+
+    var cards = hand,
+        decks = this.decks,
+        trials = Math.sqrt(this.trials);
     //alert(cards.toString())
-    let deck = new Card_Set()
+    var deck = new Card_Set();
 
     //fill up card set
-    deck.fill_decks(decks)
+    deck.fill_decks(decks);
 
-    for (let card of cards.cards)
-      deck.remove(card)
+    for (var _iterator15 = cards.cards, _isArray15 = Array.isArray(_iterator15), _i15 = 0, _iterator15 = _isArray15 ? _iterator15 : _iterator15[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(56)){break;}
+      var _ref16;
 
-    let [best_kind,___]=cards.top_of_a_kind()
-    let [best_suit,best_flush_high,_]=cards.top_suit()
-    let [fullHhouseIndex1,fullHhouseIndex2]=cards.top_of_two_kinds()
-    let straight_arr=[],straight_flush_arr=[]
-    let results=this.specific_ranks_dict
-    for (let x=5; x<=13; x++){
-      let [high,_]=cards.top_expected_straight(length)
-      let [suit,fhigh,__]=cards.top_expected_straight_flush(length)
-      straight_arr.push(high)
-      straight_flush_arr.push([suit,fhigh])
-    }
-
-    for (let trial=0; trial<trials; ++trial){
-
-      let card_set_addition = deck.getCards(this.cards-hand.length)
-      let card_set= new Card_Set(cards.cards.concat(card_set_addition.cards));
-      let longest_straight=1,longest_straight_flush=1
-      let curr_length=5
-      while(card_set.hasSpecificStraight(curr_length, straight_arr[curr_length-5])){
-        longest_straight=curr_length
-        curr_length+=1
+      if (_isArray15) {
+        if (_i15 >= _iterator15.length) break;
+        _ref16 = _iterator15[_i15++];
+      } else {
+        _i15 = _iterator15.next();
+        if (_i15.done) break;
+        _ref16 = _i15.value;
       }
+
+      var card = _ref16;
+
+      deck.remove(card);
+    }
+window.CP.exitedLoop(56);
+
+    var _cards$top_of_a_kind = cards.top_of_a_kind();
+
+    var best_kind = _cards$top_of_a_kind[0];
+    var ___ = _cards$top_of_a_kind[1];
+
+    var _cards$top_suit = cards.top_suit();
+
+    var best_suit = _cards$top_suit[0];
+    var best_flush_high = _cards$top_suit[1];
+    var _ = _cards$top_suit[2];
+
+    var _cards$top_of_two_kin = cards.top_of_two_kinds();
+
+    var fullHhouseIndex1 = _cards$top_of_two_kin[0];
+    var fullHhouseIndex2 = _cards$top_of_two_kin[1];
+
+    var straight_arr = [],
+        straight_flush_arr = [];
+    var results = this.specific_ranks_dict;
+    for (var x = 5; x <= 13; x++) {if (window.CP.shouldStopExecution(57)){break;}
+      var _cards$top_expected_s = cards.top_expected_straight(length);
+
+      var high = _cards$top_expected_s[0];
+      var _2 = _cards$top_expected_s[1];
+
+      var _cards$top_expected_s2 = cards.top_expected_straight_flush(length);
+
+      var suit = _cards$top_expected_s2[0];
+      var fhigh = _cards$top_expected_s2[1];
+      var __ = _cards$top_expected_s2[2];
+
+      straight_arr.push(high);
+      straight_flush_arr.push([suit, fhigh]);
+    }
+window.CP.exitedLoop(57);
+
+
+    for (var trial = 0; trial < trials; ++trial) {if (window.CP.shouldStopExecution(65)){break;}
+
+      var card_set_addition = deck.getCards(this.cards - hand.length);
+      var card_set = new Card_Set(cards.cards.concat(card_set_addition.cards));
+      var longest_straight = 1,
+          longest_straight_flush = 1;
+      var curr_length = 5;
+      while (card_set.hasSpecificStraight(curr_length, straight_arr[curr_length - 5])) {if (window.CP.shouldStopExecution(58)){break;}
+        longest_straight = curr_length;
+        curr_length += 1;
+      }
+window.CP.exitedLoop(58);
+
       //temp
-      curr_length=5
-      while(card_set.hasSpecificStraightFlush(curr_length, straight_flush_arr[curr_length-5][1], straight_flush_arr[curr_length-5][0])){
-        longest_straight_flush=curr_length
-        curr_length+=1
+      curr_length = 5;
+      while (card_set.hasSpecificStraightFlush(curr_length, straight_flush_arr[curr_length - 5][1], straight_flush_arr[curr_length - 5][0])) {if (window.CP.shouldStopExecution(59)){break;}
+        longest_straight_flush = curr_length;
+        curr_length += 1;
+      }
+window.CP.exitedLoop(59);
+
+
+      if (card_set.hasFullHouse(fullHhouseIndex1, fullHhouseIndex2)) {
+        var target = "Full house, specified triple and double";
+        results[target] += 1;
       }
 
-      if(card_set.hasFullHouse(fullHhouseIndex1,fullHhouseIndex2)){
-        let target="Full house, specified triple and double"
-        results[target]+=1
-      }
-
-      let longest_of_kind = card_set.numSpecificOfAKind(best_kind)
-      let longest_flush = card_set.numSpecificFlush(best_suit,best_flush_high)
+      var longest_of_kind = card_set.numSpecificOfAKind(best_kind);
+      var longest_flush = card_set.numSpecificFlush(best_suit, best_flush_high);
       //ace high
-      let longest_flush_alt= card_set.numSpecificFlush(best_suit,10)
+      var longest_flush_alt = card_set.numSpecificFlush(best_suit, 10);
 
-      for(let i=2; i<=longest_of_kind; i++){
-        let target=i+" of a kind, specified rank"
-        results[target]+=1
+      for (var i = 2; i <= longest_of_kind; i++) {if (window.CP.shouldStopExecution(60)){break;}
+        var target = i + " of a kind, specified rank";
+        results[target] += 1;
       }
+window.CP.exitedLoop(60);
 
-      for(let i=5; i<=longest_flush; i++){
-        let target=i+" long flush, specified suit and high"
-        results[target]+=1
-      }
 
-      for(let i=5; i<=longest_flush_alt; i++){
-        let target=i+" long flush, specified suit and own card high"
-        results[target]+=1
+      for (var i = 5; i <= longest_flush; i++) {if (window.CP.shouldStopExecution(61)){break;}
+        var target = i + " long flush, specified suit and high";
+        results[target] += 1;
       }
+window.CP.exitedLoop(61);
 
-      for(let i=5; i<=longest_straight; i++){
-        let target=i+" long straight, specified high"
-        results[target]+=1
-      }
 
-      for(let i=5; i<=longest_straight_flush; i++){
-        let target=i+" long straight flush, specified suit and high"
-        results[target]+=1
+      for (var i = 5; i <= longest_flush_alt; i++) {if (window.CP.shouldStopExecution(62)){break;}
+        var target = i + " long flush, specified suit and own card high";
+        results[target] += 1;
       }
+window.CP.exitedLoop(62);
+
+
+      for (var i = 5; i <= longest_straight; i++) {if (window.CP.shouldStopExecution(63)){break;}
+        var target = i + " long straight, specified high";
+        results[target] += 1;
+      }
+window.CP.exitedLoop(63);
+
+
+      for (var i = 5; i <= longest_straight_flush; i++) {if (window.CP.shouldStopExecution(64)){break;}
+        var target = i + " long straight flush, specified suit and high";
+        results[target] += 1;
+      }
+window.CP.exitedLoop(64);
+
     }
+window.CP.exitedLoop(65);
 
+  };
 
-  }
+  Optimal.prototype.find_best_play = function find_best_play(hand) {
+    if (hand.length <= 0) throw 'Error: hand too small';
 
-  find_best_play(hand){
-    if(hand.length<=0)
-       throw 'Error: hand too small'
+    if (this.cards - hand.length < 0) throw 'Error: hand too large';
 
-    if(this.cards-hand.length<0)
-      throw 'Error: hand too large'
-
-    let cards=hand, decks=this.decks,trials=this.trials
+    var cards = hand,
+        decks = this.decks,
+        trials = this.trials;
     //alert(cards.toString())
-    let deck = new Card_Set()
+    var deck = new Card_Set();
 
     //fill up card set
-    deck.fill_decks(decks)
+    deck.fill_decks(decks);
 
-    for (let card of cards.cards)
-      deck.remove(card)
+    for (var _iterator16 = cards.cards, _isArray16 = Array.isArray(_iterator16), _i16 = 0, _iterator16 = _isArray16 ? _iterator16 : _iterator16[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(66)){break;}
+      var _ref17;
 
-    let results = {}
-    let [best_kind,___]=cards.top_of_a_kind()
-    let [best_suit,best_flush_high,_]=cards.top_suit()
-    let straight_arr=[],straight_flush_arr=[]
-    for (let x=5; x<=13; x++){
-      let [high,_]=cards.top_expected_straight(length)
-      let [suit,fhigh,__]=cards.top_expected_straight_flush(length)
-      straight_arr.push(high)
-      straight_flush_arr.push([suit,fhigh])
+      if (_isArray16) {
+        if (_i16 >= _iterator16.length) break;
+        _ref17 = _iterator16[_i16++];
+      } else {
+        _i16 = _iterator16.next();
+        if (_i16.done) break;
+        _ref17 = _i16.value;
+      }
+
+      var card = _ref17;
+
+      deck.remove(card);
     }
+window.CP.exitedLoop(66);
+var results = {};
 
-    let [fullHhouseIndex1,fullHhouseIndex2]=cards.top_of_two_kinds()
+    var _cards$top_of_a_kind2 = cards.top_of_a_kind();
 
-    let htarget="Full house, "+ Card.card_num_to_str(fullHhouseIndex1)+' on '+Card.card_num_to_str(fullHhouseIndex2)
-    results[htarget]=0
+    var best_kind = _cards$top_of_a_kind2[0];
+    var ___ = _cards$top_of_a_kind2[1];
+
+    var _cards$top_suit2 = cards.top_suit();
+
+    var best_suit = _cards$top_suit2[0];
+    var best_flush_high = _cards$top_suit2[1];
+    var _ = _cards$top_suit2[2];
+
+    var straight_arr = [],
+        straight_flush_arr = [];
+    for (var x = 5; x <= 13; x++) {if (window.CP.shouldStopExecution(67)){break;}
+      var _cards$top_expected_s3 = cards.top_expected_straight(length);
+
+      var high = _cards$top_expected_s3[0];
+      var _3 = _cards$top_expected_s3[1];
+
+      var _cards$top_expected_s4 = cards.top_expected_straight_flush(length);
+
+      var suit = _cards$top_expected_s4[0];
+      var fhigh = _cards$top_expected_s4[1];
+      var __ = _cards$top_expected_s4[2];
+
+      straight_arr.push(high);
+      straight_flush_arr.push([suit, fhigh]);
+    }
+window.CP.exitedLoop(67);
+
+
+    var _cards$top_of_two_kin2 = cards.top_of_two_kinds();
+
+    var fullHhouseIndex1 = _cards$top_of_two_kin2[0];
+    var fullHhouseIndex2 = _cards$top_of_two_kin2[1];
+
+    var htarget = "Full house, " + Card.card_num_to_str(fullHhouseIndex1) + ' on ' + Card.card_num_to_str(fullHhouseIndex2);
+    results[htarget] = 0;
 
     //fill results
-    for(let i=2; i<=decks*8; i++){
-      let target=i+" of a kind "+ Card.card_num_to_str(best_kind)
-      results[target]=0
+    for (var i = 2; i <= decks * 8; i++) {if (window.CP.shouldStopExecution(68)){break;}
+      var target = i + " of a kind " + Card.card_num_to_str(best_kind);
+      results[target] = 0;
     }
+window.CP.exitedLoop(68);
 
-    for(let i=5; i<=this.cards; i++){
-      let target=i+" long "+ Card.suit_num_to_str(best_suit) +" flush, " +Card.card_num_to_str(best_flush_high)+' high'
-      let target2=i+" long "+ Card.suit_num_to_str(best_suit) +" flush, Ace high"
-      results[target]=0
-      results[target2]=0
+
+    for (var i = 5; i <= this.cards; i++) {if (window.CP.shouldStopExecution(69)){break;}
+      var target = i + " long " + Card.suit_num_to_str(best_suit) + " flush, " + Card.card_num_to_str(best_flush_high) + ' high';
+      var target2 = i + " long " + Card.suit_num_to_str(best_suit) + " flush, Ace high";
+      results[target] = 0;
+      results[target2] = 0;
     }
+window.CP.exitedLoop(69);
 
-    for(let i=5; i<=13; i++){
-      let target=i+" long straight, "+Card.card_num_to_str(straight_arr[i-5])+" high"
-      results[target]=0
+
+    for (var i = 5; i <= 13; i++) {if (window.CP.shouldStopExecution(70)){break;}
+      var target = i + " long straight, " + Card.card_num_to_str(straight_arr[i - 5]) + " high";
+      results[target] = 0;
     }
+window.CP.exitedLoop(70);
 
 
-    for(let i=5; i<=13; i++){
-      let target=i+" long straight "+Card.card_num_to_str(straight_flush_arr[i-5][0])+" flush, "+
-          Card.card_num_to_str(straight_flush_arr[i-5][1])+" high"
-      results[target]=0
+    for (var i = 5; i <= 13; i++) {if (window.CP.shouldStopExecution(71)){break;}
+      var target = i + " long straight " + Card.card_num_to_str(straight_flush_arr[i - 5][0]) + " flush, " + Card.card_num_to_str(straight_flush_arr[i - 5][1]) + " high";
+      results[target] = 0;
     }
+window.CP.exitedLoop(71);
 
 
-    for (let trial=0; trial<trials; ++trial){
-      let card_set_addition = deck.getCards(this.cards-hand.length)
-      let card_set= new Card_Set(cards.cards.concat(card_set_addition.cards));
-      let longest_straight=1,longest_straight_flush=1
-      let curr_length=5
-      while(card_set.hasSpecificStraight(curr_length, straight_arr[curr_length-5])){
-        longest_straight=curr_length
-        curr_length+=1
+    for (var trial = 0; trial < trials; ++trial) {if (window.CP.shouldStopExecution(79)){break;}
+      var card_set_addition = deck.getCards(this.cards - hand.length);
+      var card_set = new Card_Set(cards.cards.concat(card_set_addition.cards));
+      var longest_straight = 1,
+          longest_straight_flush = 1;
+      var curr_length = 5;
+      while (card_set.hasSpecificStraight(curr_length, straight_arr[curr_length - 5])) {if (window.CP.shouldStopExecution(72)){break;}
+        longest_straight = curr_length;
+        curr_length += 1;
       }
+window.CP.exitedLoop(72);
+
       //temp
-      curr_length=5
-      while(card_set.hasSpecificStraightFlush(curr_length, straight_flush_arr[curr_length-5][1], straight_flush_arr[curr_length-5][0])){
-        longest_straight_flush=curr_length
-        curr_length+=1
+      curr_length = 5;
+      while (card_set.hasSpecificStraightFlush(curr_length, straight_flush_arr[curr_length - 5][1], straight_flush_arr[curr_length - 5][0])) {if (window.CP.shouldStopExecution(73)){break;}
+        longest_straight_flush = curr_length;
+        curr_length += 1;
+      }
+window.CP.exitedLoop(73);
+
+
+      if (card_set.hasFullHouse(fullHhouseIndex1, fullHhouseIndex2)) {
+        var target = "Full house, " + Card.card_num_to_str(fullHhouseIndex1) + ' on ' + Card.card_num_to_str(fullHhouseIndex2);
+        results[target] += 1;
       }
 
-      if(card_set.hasFullHouse(fullHhouseIndex1,fullHhouseIndex2)){
-        let target="Full house, "+ Card.card_num_to_str(fullHhouseIndex1)+' on '+Card.card_num_to_str(fullHhouseIndex2)
-        results[target]+=1
-      }
-
-      let longest_of_kind = card_set.numSpecificOfAKind(best_kind)
-      let longest_flush = card_set.numSpecificFlush(best_suit,best_flush_high)
+      var longest_of_kind = card_set.numSpecificOfAKind(best_kind);
+      var longest_flush = card_set.numSpecificFlush(best_suit, best_flush_high);
       //ace high
-      let longest_flush_alt= card_set.numSpecificFlush(best_suit,10)
+      var longest_flush_alt = card_set.numSpecificFlush(best_suit, 10);
 
-      for(let i=2; i<=longest_of_kind; i++){
-        let target=i+" of a kind "+ Card.card_num_to_str(best_kind)
-        results[target]+=1
+      for (var i = 2; i <= longest_of_kind; i++) {if (window.CP.shouldStopExecution(74)){break;}
+        var target = i + " of a kind " + Card.card_num_to_str(best_kind);
+        results[target] += 1;
       }
+window.CP.exitedLoop(74);
 
-      for(let i=5; i<=longest_flush; i++){
-        let target=i+" long "+ Card.suit_num_to_str(best_suit) +" flush, " +Card.card_num_to_str(best_flush_high)+' high'
-        results[target]+=1
-      }
 
-      for(let i=5; i<=longest_flush_alt; i++){
-        let target=i+" long "+ Card.suit_num_to_str(best_suit) +" flush, Ace high"
-        results[target]+=1
+      for (var i = 5; i <= longest_flush; i++) {if (window.CP.shouldStopExecution(75)){break;}
+        var target = i + " long " + Card.suit_num_to_str(best_suit) + " flush, " + Card.card_num_to_str(best_flush_high) + ' high';
+        results[target] += 1;
       }
+window.CP.exitedLoop(75);
 
-      for(let i=5; i<=longest_straight; i++){
-        let target=i+" long straight, "+Card.card_num_to_str(straight_arr[i-5])+" high"
-        results[target]+=1
-      }
 
-      for(let i=5; i<=longest_straight_flush; i++){
-        let target=i+" long straight "+Card.card_num_to_str(straight_flush_arr[i-5][0])+" flush, "
-        Card.card_num_to_str(straight_flush_arr[i-5][1])+" high"
-        results[target]+=1
+      for (var i = 5; i <= longest_flush_alt; i++) {if (window.CP.shouldStopExecution(76)){break;}
+        var target = i + " long " + Card.suit_num_to_str(best_suit) + " flush, Ace high";
+        results[target] += 1;
       }
+window.CP.exitedLoop(76);
+
+
+      for (var i = 5; i <= longest_straight; i++) {if (window.CP.shouldStopExecution(77)){break;}
+        var target = i + " long straight, " + Card.card_num_to_str(straight_arr[i - 5]) + " high";
+        results[target] += 1;
+      }
+window.CP.exitedLoop(77);
+
+
+      for (var i = 5; i <= longest_straight_flush; i++) {if (window.CP.shouldStopExecution(78)){break;}
+        var target = i + " long straight " + Card.card_num_to_str(straight_flush_arr[i - 5][0]) + " flush, ";
+        Card.card_num_to_str(straight_flush_arr[i - 5][1]) + " high";
+        results[target] += 1;
+      }
+window.CP.exitedLoop(78);
+
     }
+window.CP.exitedLoop(79);
 
-    let arr = [];
-    for (let key in results) {
 
-      if(results[key]>.001)
-        arr.push( [results[key]*100.0/trials, key] );
+    var arr = [];
+    for (var key in results) {if (window.CP.shouldStopExecution(80)){break;}
+
+      if (results[key] > .001) arr.push([results[key] * 100.0 / trials, key]);
     }
+window.CP.exitedLoop(80);
 
-    arr.sort(function(x, y) { if (x[0] > y[0]) return 1
-                             else if (x[0]==y[0]) return 0
-                             else return -1
-                            });
 
-    for (let res of arr) {
+    arr.sort(function (x, y) {
+      if (x[0] > y[0]) return 1;else if (x[0] == y[0]) return 0;else return -1;
+    });
+
+    for (var _iterator17 = arr, _isArray17 = Array.isArray(_iterator17), _i17 = 0, _iterator17 = _isArray17 ? _iterator17 : _iterator17[Symbol.iterator]();;) {if (window.CP.shouldStopExecution(81)){break;}
       //if(res[0]>=.01)
       //console.log(res[0]+'% chance '+res[1])
+
+      var _ref18;
+
+      if (_isArray17) {
+        if (_i17 >= _iterator17.length) break;
+        _ref18 = _iterator17[_i17++];
+      } else {
+        _i17 = _iterator17.next();
+        if (_i17.done) break;
+        _ref18 = _i17.value;
+      }
+
+      var res = _ref18;
     }
-    return arr.reverse()
+window.CP.exitedLoop(81);
+
+    return arr.reverse();
+  };
+
+  return Optimal;
+}();
+
+var Bar = function (_React$Component) {
+  _inherits(Bar, _React$Component);
+
+  function Bar() {
+    _classCallCheck(this, Bar);
+
+    return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
   }
-}
 
-class Bar extends React.Component{
-  render() {
-    let divStyle = {
-      width: this.props.percent+'%',
-    }
+  Bar.prototype.render = function render() {
+    var divStyle = {
+      width: this.props.percent + '%'
+    };
 
-    return (
-      <skill className="bar_container">
-        <div className="bar" style={divStyle}> {this.props.description+': '+this.props.percent+'%'}</div>
-      </skill>
+    return React.createElement(
+      'skill',
+      { className: 'bar_container' },
+      React.createElement(
+        'div',
+        { className: 'bar', style: divStyle },
+        ' ',
+        this.props.description + ': ' + this.props.percent + '%'
+      )
     );
-  }
-}
+  };
 
+  return Bar;
+}(React.Component);
 
-class Bar_Graph extends React.Component {
-  render() {
-    let results=this.props.data_func()
-    return  <div className='bar_graph'>
-      <div className="title">
-        <h1>{this.props.name} </h1>
-        {this.props.description.split("\n").map(i => {
-            return <p className='bar_description'>{i}</p>;
-        })}
-      </div>
-      <section className="graph">
-        { results.map(function(result){
-          return <Bar percent={result[0].toFixed(3)} description={result[1]} />;
-        }) }
-      </section>
-    </div>
+var Bar_Graph = function (_React$Component2) {
+  _inherits(Bar_Graph, _React$Component2);
+
+  function Bar_Graph() {
+    _classCallCheck(this, Bar_Graph);
+
+    return _possibleConstructorReturn(this, _React$Component2.apply(this, arguments));
   }
 
-}
+  Bar_Graph.prototype.render = function render() {
+    var results = this.props.data_func();
+    return React.createElement(
+      'div',
+      { className: 'bar_graph' },
+      React.createElement(
+        'div',
+        { className: 'title' },
+        React.createElement(
+          'h1',
+          null,
+          this.props.name,
+          ' '
+        ),
+        this.props.description.split("\n").map(function (i) {
+          return React.createElement(
+            'p',
+            { className: 'bar_description' },
+            i
+          );
+        })
+      ),
+      React.createElement(
+        'section',
+        { className: 'graph' },
+        results.map(function (result) {
+          return React.createElement(Bar, { percent: result[0].toFixed(3), description: result[1] });
+        })
+      )
+    );
+  };
 
-let default_known=3,default_cards=15,default_decks=2,default_trials=10000
-let default_hand=new Card_Set()
-default_hand.add(new Card(9,0))
-default_hand.add(new Card(10,1))
-default_hand.add(new Card(3,3))
-let default_hand_choices=new Card_Set()
-default_hand_choices.fill_decks_no_shuffle(1)
+  return Bar_Graph;
+}(React.Component);
 
+var default_known = 3,
+    default_cards = 15,
+    default_decks = 2,
+    default_trials = 10000;
+var default_hand = new Card_Set();
+default_hand.add(new Card(9, 0));
+default_hand.add(new Card(10, 1));
+default_hand.add(new Card(3, 3));
+var default_hand_choices = new Card_Set();
+default_hand_choices.fill_decks_no_shuffle(1);
 
+var Hand_Options = function (_React$Component3) {
+  _inherits(Hand_Options, _React$Component3);
 
-class Hand_Options extends React.Component{
-  constructor() {
-    super();
-    this.state = {
+  function Hand_Options() {
+    _classCallCheck(this, Hand_Options);
+
+    var _this3 = _possibleConstructorReturn(this, _React$Component3.call(this));
+
+    _this3.state = {
       hand: default_hand
     };
+    return _this3;
   }
 
-  cardAdded(num,suit){
-    if(this.state.hand.length>=13)
-      return
-    this.state.hand.decks=default_decks
-    this.state.hand.safe_add(new Card(num,suit))
-    this.setState({hand:this.state.hand})
-  }
+  Hand_Options.prototype.cardAdded = function cardAdded(num, suit) {
+    if (this.state.hand.length >= 13) return;
+    this.state.hand.decks = default_decks;
+    this.state.hand.safe_add(new Card(num, suit));
+    this.setState({ hand: this.state.hand });
+  };
 
-  cardRemoved(num,suit){
-    this.state.hand.remove(new Card(num,suit))
-    this.setState({hand:this.state.hand})
-  }
+  Hand_Options.prototype.cardRemoved = function cardRemoved(num, suit) {
+    this.state.hand.remove(new Card(num, suit));
+    this.setState({ hand: this.state.hand });
+  };
 
-  run(){
-    this.props.callbackParent(this.state.hand)
-  }
+  Hand_Options.prototype.run = function run() {
+    this.props.callbackParent(this.state.hand);
+  };
 
-  render(){
-    return <div className='hand_options jumbotron'> <div className="hand_choices">
-      <h1>Hand</h1>
-       <HandCardSetIcon cb={this.cardRemoved.bind(this)} cards={this.state.hand.cards} />
-      <br/>
-      <button className='btn btn-success'  onClick={this.run.bind(this)}>Calculate</button>
-      <br/>
-      <br/>
-      <HandCardSetIcon cb={this.cardAdded.bind(this)} cards={default_hand_choices.cards.slice(0,13)} />
-      <HandCardSetIcon cb={this.cardAdded.bind(this)} cards={default_hand_choices.cards.slice(13,26)} />
-      <HandCardSetIcon cb={this.cardAdded.bind(this)} cards={default_hand_choices.cards.slice(26,39)} />
-      <HandCardSetIcon cb={this.cardAdded.bind(this)} cards={default_hand_choices.cards.slice(39,52)} />
-      </div>
-    </div>
-  }
-}
+  Hand_Options.prototype.render = function render() {
+    return React.createElement(
+      'div',
+      { className: 'hand_options jumbotron' },
+      ' ',
+      React.createElement(
+        'div',
+        { className: 'hand_choices' },
+        React.createElement(
+          'h1',
+          null,
+          'Hand'
+        ),
+        React.createElement(HandCardSetIcon, { cb: this.cardRemoved.bind(this), cards: this.state.hand.cards }),
+        React.createElement('br', null),
+        React.createElement(
+          'button',
+          { className: 'btn btn-success', onClick: this.run.bind(this) },
+          'Calculate'
+        ),
+        React.createElement('br', null),
+        React.createElement('br', null),
+        React.createElement(HandCardSetIcon, { cb: this.cardAdded.bind(this), cards: default_hand_choices.cards.slice(0, 13) }),
+        React.createElement(HandCardSetIcon, { cb: this.cardAdded.bind(this), cards: default_hand_choices.cards.slice(13, 26) }),
+        React.createElement(HandCardSetIcon, { cb: this.cardAdded.bind(this), cards: default_hand_choices.cards.slice(26, 39) }),
+        React.createElement(HandCardSetIcon, { cb: this.cardAdded.bind(this), cards: default_hand_choices.cards.slice(39, 52) })
+      )
+    );
+  };
 
+  return Hand_Options;
+}(React.Component);
 
-class Deck_Options extends React.Component{
-  constructor() {
-    super()
-    this.state = {
+var Deck_Options = function (_React$Component4) {
+  _inherits(Deck_Options, _React$Component4);
+
+  function Deck_Options() {
+    _classCallCheck(this, Deck_Options);
+
+    var _this4 = _possibleConstructorReturn(this, _React$Component4.call(this));
+
+    _this4.state = {
       cards: default_cards,
       decks: default_decks,
       trials: default_trials
     };
+    return _this4;
   }
 
-  clicked(){
-    if(this.state.cards <5 || this.state.cards > this.state.decks*52){
-      alert('Error: invalid number of total cards')
+  Deck_Options.prototype.clicked = function clicked() {
+    if (this.state.cards < 5 || this.state.cards > this.state.decks * 52) {
+      alert('Error: invalid number of total cards');
+    } else if (this.state.known < 0 > this.state.known > this.state.cards) {
+      alert('Error: invalid number of known cards');
+    } else {
+      var newState = this.state;
+      this.props.callbackParent(newState);
     }
+  };
 
-    else if(this.state.known <0 > this.state.known > this.state.cards ){
-      alert('Error: invalid number of known cards')
-    }
-    else {
-      let newState=this.state
-      this.props.callbackParent(newState)
-    }
-  }
+  Deck_Options.prototype.handleCardsChange = function handleCardsChange(event) {
+    var value = parseInt(event.target.value);
+    this.setState({ cards: value });
+    default_cards = value;
+  };
 
-  handleCardsChange (event) {
-    let value=parseInt(event.target.value)
-    this.setState({ cards: value})
-    default_cards=value
-  }
-
-
-  handleDecksChange (event) {
-    let value=parseInt(event.target.options[event.target.selectedIndex].value)
+  Deck_Options.prototype.handleDecksChange = function handleDecksChange(event) {
+    var value = parseInt(event.target.options[event.target.selectedIndex].value);
     this.setState({ decks: value });
-    default_decks=value
-  }
+    default_decks = value;
+  };
 
-  handleTrialsChange (event) {
-     let value=parseInt(event.target.options[event.target.selectedIndex].value)
+  Deck_Options.prototype.handleTrialsChange = function handleTrialsChange(event) {
+    var value = parseInt(event.target.options[event.target.selectedIndex].value);
     this.setState({ trials: value });
-    default_trials=value
-  }
+    default_trials = value;
+  };
 
-  render() {
-    let d1=(default_decks==1) ? <option selected value="1">1</option>
-        : <option value="1">1</option>
-    let d2=(default_decks==2) ? <option selected value="2">2</option>
-        : <option value="2">2</option>
-    let d3=(default_decks==3) ? <option selected value="3">3</option>
-        : <option value="3">3</option>
-    let d4=(default_decks==4) ? <option selected value="4">4</option>
-        : <option value="4">4</option>
+  Deck_Options.prototype.render = function render() {
+    var d1 = default_decks == 1 ? React.createElement(
+      'option',
+      { selected: true, value: '1' },
+      '1'
+    ) : React.createElement(
+      'option',
+      { value: '1' },
+      '1'
+    );
+    var d2 = default_decks == 2 ? React.createElement(
+      'option',
+      { selected: true, value: '2' },
+      '2'
+    ) : React.createElement(
+      'option',
+      { value: '2' },
+      '2'
+    );
+    var d3 = default_decks == 3 ? React.createElement(
+      'option',
+      { selected: true, value: '3' },
+      '3'
+    ) : React.createElement(
+      'option',
+      { value: '3' },
+      '3'
+    );
+    var d4 = default_decks == 4 ? React.createElement(
+      'option',
+      { selected: true, value: '4' },
+      '4'
+    ) : React.createElement(
+      'option',
+      { value: '4' },
+      '4'
+    );
 
-    let t1=(default_trials==100) ? <option selected value="100">100</option>
-        : <option value="100">100</option>
-    let t2=(default_trials==1000) ? <option selected value="1000">1000</option>
-        : <option value="1000">1000</option>
-    let t3=(default_trials==10000) ? <option selected value="10000">10000</option>
-        : <option value="10000">10000</option>
-    let t4=(default_trials==100000) ? <option selected value="100000">100000</option>
-        : <option value="100000">100000</option>
+    var t1 = default_trials == 100 ? React.createElement(
+      'option',
+      { selected: true, value: '100' },
+      '100'
+    ) : React.createElement(
+      'option',
+      { value: '100' },
+      '100'
+    );
+    var t2 = default_trials == 1000 ? React.createElement(
+      'option',
+      { selected: true, value: '1000' },
+      '1000'
+    ) : React.createElement(
+      'option',
+      { value: '1000' },
+      '1000'
+    );
+    var t3 = default_trials == 10000 ? React.createElement(
+      'option',
+      { selected: true, value: '10000' },
+      '10000'
+    ) : React.createElement(
+      'option',
+      { value: '10000' },
+      '10000'
+    );
+    var t4 = default_trials == 100000 ? React.createElement(
+      'option',
+      { selected: true, value: '100000' },
+      '100000'
+    ) : React.createElement(
+      'option',
+      { value: '100000' },
+      '100000'
+    );
 
-    return <div className='deck_options jumbotron'>
-      <h1>Deck Options</h1>
-      <div className="form-inline deck">
-          <label className="mr-sm-2" for="inlineFormInput">Total</label>
-        <input defaultValue={default_cards} onChange={this.handleCardsChange.bind(this)} type="number" className="num_input form-control mb-2 mr-sm-2 mb-sm-0" />
+    return React.createElement(
+      'div',
+      { className: 'deck_options jumbotron' },
+      React.createElement(
+        'h1',
+        null,
+        'Deck Options'
+      ),
+      React.createElement(
+        'div',
+        { className: 'form-inline deck' },
+        React.createElement(
+          'label',
+          { className: 'mr-sm-2', 'for': 'inlineFormInput' },
+          'Total'
+        ),
+        React.createElement('input', { defaultValue: default_cards, onChange: this.handleCardsChange.bind(this), type: 'number', className: 'num_input form-control mb-2 mr-sm-2 mb-sm-0' }),
+        React.createElement(
+          'label',
+          { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+          'Decks'
+        ),
+        React.createElement(
+          'select',
+          { onChange: this.handleDecksChange.bind(this), className: 'custom-select mb-2 mr-sm-2 mb-sm-0' },
+          d1,
+          d2,
+          d3,
+          d4
+        ),
+        React.createElement(
+          'label',
+          { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+          'Trials'
+        ),
+        React.createElement(
+          'select',
+          { onChange: this.handleTrialsChange.bind(this), className: 'custom-select mb-2 mr-sm-2 mb-sm-0' },
+          t1,
+          t2,
+          t3,
+          t4
+        ),
+        React.createElement(
+          'button',
+          { className: 'settings btn btn-success', onClick: this.clicked.bind(this) },
+          ' Set '
+        )
+      )
+    );
+  };
 
-        <label className="mr-sm-2" for="inlineFormCustomSelect">Decks</label>
-        <select onChange={this.handleDecksChange.bind(this)} className="custom-select mb-2 mr-sm-2 mb-sm-0">
-          {d1}
-          {d2}
-          {d3}
-          {d4}
-        </select>
+  return Deck_Options;
+}(React.Component);
 
-        <label className="mr-sm-2" for="inlineFormCustomSelect">Trials</label>
-        <select onChange={this.handleTrialsChange.bind(this)} className="custom-select mb-2 mr-sm-2 mb-sm-0">
-          {t1}
-          {t2}
-          {t3}
-          {t4}
-        </select>
-        <button className='settings btn btn-success' onClick={this.clicked.bind(this)}> Set </button>
-      </div>
-    </div>
-  }
-}
+var Known_Option = function (_React$Component5) {
+  _inherits(Known_Option, _React$Component5);
 
+  function Known_Option() {
+    _classCallCheck(this, Known_Option);
 
-class Known_Option extends React.Component{
-  constructor() {
-    super()
-    this.state = {
+    var _this5 = _possibleConstructorReturn(this, _React$Component5.call(this));
+
+    _this5.state = {
       known: default_known
-    }
+    };
+    return _this5;
   }
 
-  clicked(){
-    if(this.state.known <= 0 || this.state.known > default_cards ){
-      alert('Error: invalid number of known cards')
-    }
-  else
-    this.props.callbackParent(default_known)
-  }
+  Known_Option.prototype.clicked = function clicked() {
+    if (this.state.known <= 0 || this.state.known > default_cards) {
+      alert('Error: invalid number of known cards');
+    } else this.props.callbackParent(default_known);
+  };
 
-  handleKnownCardsChange (event) {
-    let value=parseInt(event.target.value)
-    this.setState({ known: value })
-    default_known=value
-  }
+  Known_Option.prototype.handleKnownCardsChange = function handleKnownCardsChange(event) {
+    var value = parseInt(event.target.value);
+    this.setState({ known: value });
+    default_known = value;
+  };
 
-  render() {
-    return <div className='deck_options jumbotron'>
-      <h1>Known Cards</h1>
-      <div className="form-inline deck">
-        <label className="mr-sm-2" for="inlineFormInput">Known</label>
-        <input defaultValue={default_known} onChange={this.handleKnownCardsChange.bind(this)} type="number" className="num_input form-control mb-2 mr-sm-2 mb-sm-0" />
-        <button className='settings btn btn-success' onClick={this.clicked.bind(this)}> Set </button>
-      </div>
-    </div>
-  }
-}
+  Known_Option.prototype.render = function render() {
+    return React.createElement(
+      'div',
+      { className: 'deck_options jumbotron' },
+      React.createElement(
+        'h1',
+        null,
+        'Known Cards'
+      ),
+      React.createElement(
+        'div',
+        { className: 'form-inline deck' },
+        React.createElement(
+          'label',
+          { className: 'mr-sm-2', 'for': 'inlineFormInput' },
+          'Known'
+        ),
+        React.createElement('input', { defaultValue: default_known, onChange: this.handleKnownCardsChange.bind(this), type: 'number', className: 'num_input form-control mb-2 mr-sm-2 mb-sm-0' }),
+        React.createElement(
+          'button',
+          { className: 'settings btn btn-success', onClick: this.clicked.bind(this) },
+          ' Set '
+        )
+      )
+    );
+  };
 
-class Calculator extends React.Component {
-  constructor() {
-    super()
-    this.state = {
+  return Known_Option;
+}(React.Component);
+
+var Calculator = function (_React$Component6) {
+  _inherits(Calculator, _React$Component6);
+
+  function Calculator() {
+    _classCallCheck(this, Calculator);
+
+    var _this6 = _possibleConstructorReturn(this, _React$Component6.call(this));
+
+    _this6.state = {
       page: 'about',
       cards: default_cards,
       decks: default_decks,
       trials: default_trials,
       known: default_known,
       hand: default_hand,
-      opt: new Optimal(default_cards,default_decks,default_trials)
-    }
+      opt: new Optimal(default_cards, default_decks, default_trials)
+    };
+    return _this6;
   }
 
-  onDeckChanged(newState) {
+  Calculator.prototype.onDeckChanged = function onDeckChanged(newState) {
     this.setState({ cards: newState.cards,
-                   decks: newState.decks,
-                   trials: newState.trials,
-                   opt: new Optimal(newState.cards,newState.decks,newState.trials)
-                  })
+      decks: newState.decks,
+      trials: newState.trials,
+      opt: new Optimal(newState.cards, newState.decks, newState.trials)
+    });
+  };
 
-  }
+  Calculator.prototype.onKnownChanged = function onKnownChanged(known) {
+    this.setState({ known: known });
+  };
 
-  onKnownChanged(known){
-    this.setState({known: known})
-  }
+  Calculator.prototype.onHandChanged = function onHandChanged(hand) {
+    this.setState({ hand: hand });
+  };
 
-  onHandChanged(hand) {
-    this.setState({ hand: hand })
-  }
+  Calculator.prototype.onPageChanged = function onPageChanged(page) {
+    this.setState({ page: page });
+  };
 
-   onPageChanged(page) {
-    this.setState({ page: page })
-  }
+  Calculator.prototype.render = function render() {
+    var remaining = this.state.cards - this.state.known;
+    var deck_word = 'deck';
+    if (this.state.decks > 1) deck_word = this.state.decks + ' decks';
+    var deck_opts = React.createElement(Deck_Options, { callbackParent: this.onDeckChanged.bind(this)
+    });
+    var main = '';
 
-
-  render(){
-    let remaining=this.state.cards - this.state.known
-    let deck_word='deck'
-    if(this.state.decks>1)
-      deck_word=this.state.decks+' decks'
-    let deck_opts=<Deck_Options callbackParent={this.onDeckChanged.bind(this)}
-       />
-    let main=''
-
-    switch(this.state.page){
-      case 'about': main=<Rules />
-      break
-       case 'general': main=<div> {deck_opts}
-        <Bar_Graph data_func={this.state.opt.rank_general_chances.bind(this.state.opt)}
-        name='General Chances'
-        description={'Here are odds that a set of '+this.state.cards+
-          " cards from the "+deck_word+" contains each BS combination (four of a kind, any flush, any straight, etc). \nFor each of "+this.state.trials+" trials, the program chose a psuedorandom set of "+this.state.cards+' cards from the '+deck_word+" and judged whether the set contained each particular combition. \nIf a particular combination is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards."} />
-         </div>
-         break
-        case 'specific': main=<div>
-         {deck_opts}
-        < Known_Option callbackParent={this.onKnownChanged.bind(this)} />
-         <Bar_Graph data_func={this.state.opt.rank_specific_chances.bind(this.state.opt,this.state.known)}
-        name='Specific Chances'
-           description={'Here are odds that a set of '+this.state.cards+
-          " cards from "+this.state.decks+" decks contains the particular BS call from each category which has the highest chance of occuring, based on the "+this.state.known+" known cards. \nFor each of "+this.state.trials+" trials, the program chose a psuedorandom hand of "+this.state.known+' cards from the '+deck_word+" and call the most likely BS call from each combination. For example, when the hand contained a large number of fives, the program called 4 of a kind fives rather than 4 of a kind sixes for the four of a kind combination. Then the program added a psuedorandom set of "+remaining+" cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards."} />
-         </div>
-         break
-         case 'play':  main=<div>
-         {deck_opts}
-         <Hand_Options callbackParent={this.onHandChanged.bind(this)} />
-      <Bar_Graph data_func={this.state.opt.find_best_play.bind(this.state.opt,this.state.hand)}
-        name='Best Plays'
-        description={'Here are BS calls which have the highest chance of being true, given  a set of '+this.state.cards+
-          " cards from "+this.state.decks+" decks which includes the hand selected above. \nFor each of "+this.state.trials+" trials, the program added a psuedorandom set of  "+remaining+" cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards."} />
-         </div>
-         break
-   }
-
-    return <div>
-      <NavBar cb={this.onPageChanged.bind(this)}/>
-      {main}
-      <Footer/>
-    </div>
-  }
-
-}
-
-
-class CardIcon extends React.Component {
-  render() {
-    let word=<p/>
-      let style={};
-    if(this.props.suit>=2)
-      style={ color: '#C30A0A'};
-      switch(this.props.suit){
-        case 0: word=<p style={style}>&spades;</p>
-        break
-        case 1: word=<p style={style}>&clubs;</p>
-        break
-        case 2: word=<p style={style}>&diams;</p>
-        break
-        case 3: word=<p style={style}>&hearts;</p>
-        break
-      }
-
-    return <div className="card" >
-      {word}
-      <p style={style}>{Card.num_char(this.props.num)} </p>
-    </div>;
-  }
-}
-
-class NavBar extends React.Component {
-  constructor() {
-    super()
-    this.state = {
-      page: 'about'
+    switch (this.state.page) {
+      case 'about':
+        main = React.createElement(Rules, null);
+        break;
+      case 'general':
+        main = React.createElement(
+          'div',
+          null,
+          ' ',
+          deck_opts,
+          React.createElement(Bar_Graph, { data_func: this.state.opt.rank_general_chances.bind(this.state.opt),
+            name: 'General Chances',
+            description: 'Here are odds that a set of ' + this.state.cards + " cards from the " + deck_word + " contains each BS combination (four of a kind, any flush, any straight, etc). \nFor each of " + this.state.trials + " trials, the program chose a psuedorandom set of " + this.state.cards + ' cards from the ' + deck_word + " and judged whether the set contained each particular combition. \nIf a particular combination is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards." })
+        );
+        break;
+      case 'specific':
+        main = React.createElement(
+          'div',
+          null,
+          deck_opts,
+          React.createElement(Known_Option, { callbackParent: this.onKnownChanged.bind(this) }),
+          React.createElement(Bar_Graph, { data_func: this.state.opt.rank_specific_chances.bind(this.state.opt, this.state.known),
+            name: 'Specific Chances',
+            description: 'Here are odds that a set of ' + this.state.cards + " cards from " + this.state.decks + " decks contains the particular BS call from each category which has the highest chance of occuring, based on the " + this.state.known + " known cards. \nFor each of " + this.state.trials + " trials, the program chose a psuedorandom hand of " + this.state.known + ' cards from the ' + deck_word + " and call the most likely BS call from each combination. For example, when the hand contained a large number of fives, the program called 4 of a kind fives rather than 4 of a kind sixes for the four of a kind combination. Then the program added a psuedorandom set of " + remaining + " cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards." })
+        );
+        break;
+      case 'play':
+        main = React.createElement(
+          'div',
+          null,
+          deck_opts,
+          React.createElement(Hand_Options, { callbackParent: this.onHandChanged.bind(this) }),
+          React.createElement(Bar_Graph, { data_func: this.state.opt.find_best_play.bind(this.state.opt, this.state.hand),
+            name: 'Best Plays',
+            description: 'Here are BS calls which have the highest chance of being true, given  a set of ' + this.state.cards + " cards from " + this.state.decks + " decks which includes the hand selected above. \nFor each of " + this.state.trials + " trials, the program added a psuedorandom set of  " + remaining + " cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards." })
+        );
+        break;
     }
+
+    return React.createElement(
+      'div',
+      null,
+      React.createElement(NavBar, { cb: this.onPageChanged.bind(this) }),
+      main,
+      React.createElement(Footer, null)
+    );
+  };
+
+  return Calculator;
+}(React.Component);
+
+var CardIcon = function (_React$Component7) {
+  _inherits(CardIcon, _React$Component7);
+
+  function CardIcon() {
+    _classCallCheck(this, CardIcon);
+
+    return _possibleConstructorReturn(this, _React$Component7.apply(this, arguments));
   }
 
-  onPageChanged(newPage) {
-    this.setState({ page: newPage })
-    this.props.cb(newPage)
+  CardIcon.prototype.render = function render() {
+    var word = React.createElement('p', null);
+    var style = {};
+    if (this.props.suit >= 2) style = { color: '#C30A0A' };
+    switch (this.props.suit) {
+      case 0:
+        word = React.createElement(
+          'p',
+          { style: style },
+          '♠'
+        );
+        break;
+      case 1:
+        word = React.createElement(
+          'p',
+          { style: style },
+          '♣'
+        );
+        break;
+      case 2:
+        word = React.createElement(
+          'p',
+          { style: style },
+          '♦'
+        );
+        break;
+      case 3:
+        word = React.createElement(
+          'p',
+          { style: style },
+          '♥'
+        );
+        break;
+    }
+
+    return React.createElement(
+      'div',
+      { className: 'card' },
+      word,
+      React.createElement(
+        'p',
+        { style: style },
+        Card.num_char(this.props.num),
+        ' '
+      )
+    );
+  };
+
+  return CardIcon;
+}(React.Component);
+
+var NavBar = function (_React$Component8) {
+  _inherits(NavBar, _React$Component8);
+
+  function NavBar() {
+    _classCallCheck(this, NavBar);
+
+    var _this8 = _possibleConstructorReturn(this, _React$Component8.call(this));
+
+    _this8.state = {
+      page: 'about'
+    };
+    return _this8;
   }
 
-  render() {
-    let reg="nav-item nav-link"
-    let active="nav-item nav-link active"
-    return <nav className="navbar navbar-toggleable-md navbar-light bg-faded">
-  <p className="navbar-brand">BS</p>
-    <div className="navbar-nav">
-      <a className={this.state.page=='about' ? active: reg}  onClick={this.onPageChanged.bind(this,'about')} >About </a>
-      <a className={this.state.page=='general' ? active: reg}   onClick={this.onPageChanged.bind(this,'general')} >GeneralRank</a>
-      <a className={this.state.page=='specific' ? active: reg}   onClick={this.onPageChanged.bind(this,'specific')} >SpecificRank</a>
-      <a className={this.state.page=='play' ?  active: reg}   onClick={this.onPageChanged.bind(this,'play')} >BestPlay</a>
-    </div>
-</nav> }
-}
+  NavBar.prototype.onPageChanged = function onPageChanged(newPage) {
+    this.setState({ page: newPage });
+    this.props.cb(newPage);
+  };
 
-class HandCardIcon extends React.Component {
-  constructor() {
-    super();
+  NavBar.prototype.render = function render() {
+    var reg = "nav-item nav-link";
+    var active = "nav-item nav-link active";
+    return React.createElement(
+      'nav',
+      { className: 'navbar navbar-toggleable-md navbar-light bg-faded' },
+      React.createElement(
+        'p',
+        { className: 'navbar-brand' },
+        'BS'
+      ),
+      React.createElement(
+        'div',
+        { className: 'navbar-nav' },
+        React.createElement(
+          'a',
+          { className: this.state.page == 'about' ? active : reg, onClick: this.onPageChanged.bind(this, 'about') },
+          'About '
+        ),
+        React.createElement(
+          'a',
+          { className: this.state.page == 'general' ? active : reg, onClick: this.onPageChanged.bind(this, 'general') },
+          'GeneralRank'
+        ),
+        React.createElement(
+          'a',
+          { className: this.state.page == 'specific' ? active : reg, onClick: this.onPageChanged.bind(this, 'specific') },
+          'SpecificRank'
+        ),
+        React.createElement(
+          'a',
+          { className: this.state.page == 'play' ? active : reg, onClick: this.onPageChanged.bind(this, 'play') },
+          'BestPlay'
+        )
+      )
+    );
+  };
+
+  return NavBar;
+}(React.Component);
+
+var HandCardIcon = function (_React$Component9) {
+  _inherits(HandCardIcon, _React$Component9);
+
+  function HandCardIcon() {
+    _classCallCheck(this, HandCardIcon);
+
+    return _possibleConstructorReturn(this, _React$Component9.call(this));
   }
 
-  clicked(){
-    this.props.cb(this.props.num,this.props.suit)
+  HandCardIcon.prototype.clicked = function clicked() {
+    this.props.cb(this.props.num, this.props.suit);
+  };
+
+  HandCardIcon.prototype.render = function render() {
+    return React.createElement(
+      'a',
+      { onClick: this.clicked.bind(this) },
+      React.createElement(CardIcon, { suit: this.props.suit, num: this.props.num })
+    );
+  };
+
+  return HandCardIcon;
+}(React.Component);
+
+var HandCardSetIcon = function (_React$Component10) {
+  _inherits(HandCardSetIcon, _React$Component10);
+
+  function HandCardSetIcon() {
+    _classCallCheck(this, HandCardSetIcon);
+
+    return _possibleConstructorReturn(this, _React$Component10.apply(this, arguments));
   }
 
-  render() {
-    return <a onClick={this.clicked.bind(this)}>
-      <CardIcon suit={this.props.suit} num={this.props.num} />
-    </a>
+  HandCardSetIcon.prototype.render = function render() {
+    var cb = this.props.cb;
+
+    return React.createElement(
+      'div',
+      { className: 'container cardset' },
+      this.props.cards.map(function (card) {
+        return React.createElement(HandCardIcon, { suit: card.suit, num: card.num, cb: cb });
+      })
+    );
+  };
+
+  return HandCardSetIcon;
+}(React.Component);
+
+var CardSetIcon = function (_React$Component11) {
+  _inherits(CardSetIcon, _React$Component11);
+
+  function CardSetIcon() {
+    _classCallCheck(this, CardSetIcon);
+
+    return _possibleConstructorReturn(this, _React$Component11.apply(this, arguments));
   }
-}
 
-class HandCardSetIcon extends React.Component {
-  render() {
-    let cb=this.props.cb
+  CardSetIcon.prototype.render = function render() {
+    return React.createElement(
+      'div',
+      { className: 'container cardset' },
+      this.props.cards.map(function (card, i) {
+        return React.createElement(CardIcon, { num: card.num, suit: card.suit });
+      })
+    );
+  };
 
-    return <div className="container cardset">
-        { this.props.cards.map(function(card){
-          return <HandCardIcon suit={card.suit} num={card.num} cb={cb}/>
-        }) }
-    </div>
+  return CardSetIcon;
+}(React.Component);
+
+var Footer = function (_React$Component12) {
+  _inherits(Footer, _React$Component12);
+
+  function Footer() {
+    _classCallCheck(this, Footer);
+
+    return _possibleConstructorReturn(this, _React$Component12.apply(this, arguments));
   }
-}
 
+  Footer.prototype.render = function render() {
+    return React.createElement(
+      'div',
+      { className: 'footer' },
+      React.createElement(
+        'h3',
+        null,
+        '© 2017 Jennie Zheng '
+      ),
+      React.createElement(
+        'ul',
+        { className: 'fa-ul footer_links' },
+        React.createElement(
+          'li',
+          null,
+          React.createElement(
+            'a',
+            { target: '_blank', href: 'https://www.linkedin.com/in/jenniezheng' },
+            React.createElement('i', { className: 'fa-linkedin fa' })
+          )
+        ),
+        React.createElement(
+          'li',
+          null,
+          React.createElement(
+            'a',
+            { target: '_blank', href: 'https://www.facebook.com/jenniezheng2' },
+            ' ',
+            React.createElement('i', { className: 'fa-facebook fa' })
+          )
+        ),
+        React.createElement(
+          'li',
+          null,
+          React.createElement(
+            'a',
+            { target: '_blank', href: 'https://github.com/jenniezheng321' },
+            React.createElement('i', { className: 'fa-github fa' })
+          )
+        )
+      )
+    );
+  };
 
-class CardSetIcon extends React.Component {
-  render() {
-    return <div className="container cardset">
-        { this.props.cards.map(function(card, i){
-          return <CardIcon num={card.num} suit={card.suit}/>
-        }) }
-    </div>
+  return Footer;
+}(React.Component);
+
+var tut1 = new Card_Set();
+tut1.add(new Card(3, 2));
+tut1.add(new Card(7, 0));
+tut1.add(new Card(8, 0));
+tut1.add(new Card(9, 1));
+tut1.add(new Card(0, 3));
+tut1.add(new Card(11, 2));
+tut1.add(new Card(12, 1));
+
+var tut2 = new Card_Set();
+tut2.add(new Card(0, 3));
+tut2.add(new Card(0, 2));
+tut2.add(new Card(11, 1));
+tut2.add(new Card(12, 3));
+tut2.add(new Card(12, 2));
+tut2.add(new Card(12, 1));
+
+var tut3 = new Card_Set();
+tut3.add(new Card(0, 3));
+tut3.add(new Card(1, 3));
+tut3.add(new Card(4, 3));
+tut3.add(new Card(10, 3));
+tut3.add(new Card(11, 3));
+tut3.add(new Card(12, 3));
+
+var tut4 = new Card_Set();
+tut4.add(new Card(0, 3));
+tut4.add(new Card(1, 1));
+tut4.add(new Card(1, 3));
+tut4.add(new Card(2, 2));
+tut4.add(new Card(7, 1));
+
+var Rules = function (_React$Component13) {
+  _inherits(Rules, _React$Component13);
+
+  function Rules() {
+    _classCallCheck(this, Rules);
+
+    return _possibleConstructorReturn(this, _React$Component13.apply(this, arguments));
   }
-}
 
+  Rules.prototype.render = function render() {
+    return React.createElement(
+      'div',
+      { className: 'rules jumbotron' },
+      React.createElement(
+        'h1',
+        null,
+        'How To'
+      ),
+      React.createElement(
+        'h3',
+        null,
+        'Rules'
+      ),
+      React.createElement(
+        'ul',
+        null,
+        React.createElement(
+          'li',
+          null,
+          'Every player starts with 2 cards.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'The players take turns going clockwise. Each turn, a player can call a higher hand or call BS on the previously called hand.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'The player who lost a card gets to go first, or if that player is out, the next player goes first.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'Players may only see their own hand but are calling hands regarding the cards pooled together by all players.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'When a player calls BS, all players reveal their cards and sees whether the hand can be formed from 5 or more of the total cards'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'If the hand exists, the BS failed and the player who called BS gains a card.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'If the hand doesn\'t exist, the BS succeeded and the player who called the hand gains a card.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'The person who lost starts the next round.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'A player is out when they have 6 cards in their hand.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'The game continues until only one player is left.'
+        )
+      ),
+      React.createElement(
+        'h3',
+        null,
+        'Hands'
+      ),
+      React.createElement(
+        'ul',
+        null,
+        React.createElement(
+          'li',
+          null,
+          'Jokers are not part of the deck.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          '2\'s are wild cards which can be substituted for any rank or suit.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'All regular poker hands are valid.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'Straights, flushes, straight flushes, and of a kinds can extend beyond 5 cards'
+        )
+      ),
+      React.createElement(
+        'h3',
+        null,
+        'Examples'
+      ),
+      React.createElement(
+        'ul',
+        null,
+        React.createElement(
+          'li',
+          null,
+          ' The following contains a 6 long straight Ace high, because the wild card 2 can act as a queen.',
+          React.createElement(CardSetIcon, { cards: tut1.cards })
+        ),
+        React.createElement('br', null),
+        React.createElement(
+          'li',
+          null,
+          ' The following does not contain a full house, 3 on 9. The wild card may act as either the third 3 or the second 9, but it cannot be both.',
+          React.createElement(CardSetIcon, { cards: tut4.cards })
+        ),
+        React.createElement('br', null),
+        React.createElement(
+          'li',
+          null,
+          ' The following contains an Ace five of a kind, thanks to double wilds.',
+          React.createElement(CardSetIcon, { cards: tut2.cards })
+        ),
+        React.createElement('br', null),
+        React.createElement(
+          'li',
+          null,
+          ' The following does not contain a hearts flush, Queen high. While there are enough hearts, only 4 are capable of being equal or below Queen (2, 3, 6, and Q).',
+          React.createElement(CardSetIcon, { cards: tut3.cards })
+        )
+      )
+    );
+  };
 
-class Footer extends React.Component {
-  render() {
-    return <div className="footer">
-      <h3>&copy; 2017 Jennie Zheng </h3>
-      <ul className='fa-ul footer_links'>
-        <li><a target="_blank" href="https://www.linkedin.com/in/jenniezheng"><i className="fa-linkedin fa"></i></a></li>
-        <li><a target="_blank" href="https://www.facebook.com/jenniezheng2" > <i className="fa-facebook fa"></i></a></li>
-        <li><a target="_blank" href="https://github.com/jenniezheng321"><i className="fa-github fa"></i></a></li>
-      </ul>
-    </div>
-  }
-}
+  return Rules;
+}(React.Component);
 
-
-
-let tut1=new Card_Set()
-    tut1.add(new Card(3,2))
-    tut1.add(new Card(7,0))
-    tut1.add(new Card(8,0))
-    tut1.add(new Card(9,1))
-    tut1.add(new Card(0,3))
-    tut1.add(new Card(11,2))
-    tut1.add(new Card(12,1))
-
-let tut2=new Card_Set()
-    tut2.add(new Card(0,3))
-    tut2.add(new Card(0,2))
-    tut2.add(new Card(11,1))
-    tut2.add(new Card(12,3))
-    tut2.add(new Card(12,2))
-    tut2.add(new Card(12,1))
-
-let tut3=new Card_Set()
-    tut3.add(new Card(0,3))
-    tut3.add(new Card(1,3))
-    tut3.add(new Card(4,3))
-    tut3.add(new Card(10,3))
-    tut3.add(new Card(11,3))
-    tut3.add(new Card(12,3))
-
-let tut4=new Card_Set()
-    tut4.add(new Card(0,3))
-    tut4.add(new Card(1,1))
-    tut4.add(new Card(1,3))
-    tut4.add(new Card(2,2))
-    tut4.add(new Card(7,1))
-
-class Rules extends React.Component {
-  render() {
-    return <div className="rules jumbotron">
-  <h1>How To</h1>
-      <h3>Rules</h3>
-  <ul>
- <li>Every player starts with 2 cards.</li>
-    <li>The players take turns going clockwise. Each turn, a player can call a higher hand or call BS on the previously called hand.</li>
-       <li>The player who lost a card gets to go first, or if that player is out, the next player goes first.</li>
-          <li>Players may only see their own hand but are calling hands regarding the cards pooled together by all players.</li>
-             <li>When a player calls BS, all players reveal their cards and sees whether the hand can be formed from 5 or more of the total cards</li>
-    <li>If the hand exists, the BS failed and the player who called BS gains a card.</li>
-     <li>If the hand doesn't exist, the BS succeeded and the player who called the hand gains a card.</li>
-    <li>The person who lost starts the next round.</li>
-    <li>A player is out when they have 6 cards in their hand.</li>
-    <li>The game continues until only one player is left.</li>
-  </ul>
-
-      <h3>Hands</h3>
-  <ul>
-    <li>Jokers are not part of the deck.</li>
- <li>2's are wild cards which can be substituted for any rank or suit.</li>
-    <li>All regular poker hands are valid.</li>
-    <li>Straights, flushes, straight flushes, and of a kinds can extend beyond 5 cards</li>
-  </ul>
-
-       <h3>Examples</h3>
-  <ul><li> The following contains a 6 long straight Ace high, because the wild card 2 can act as a queen.
-      <CardSetIcon cards={tut1.cards} />
-     </li>
-    <br/>
-    <li> The following does not contain a full house, 3 on 9. The wild card may act as either the third 3 or the second 9, but it cannot be both.
-      <CardSetIcon cards={tut4.cards} />
-    </li>
-    <br/>
-    <li> The following contains an Ace five of a kind, thanks to double wilds.
-      <CardSetIcon cards={tut2.cards} />
-    </li>
-    <br/>
-    <li> The following does not contain a hearts flush, Queen high. While there are enough hearts, only 4 are capable of being equal or below Queen (2, 3, 6, and Q).
-      <CardSetIcon cards={tut3.cards} />
-    </li>
-   </ul>
-</div>
-
-
-  }
-}
-
-
-
-ReactDOM.render(<Calculator />, document.getElementById('app'));
+ReactDOM.render(React.createElement(Calculator, null), document.getElementById('app'));

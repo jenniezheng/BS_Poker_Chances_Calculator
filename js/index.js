@@ -650,13 +650,9 @@ var Optimal = function () {
     this.cards = cards;
     this.decks = decks;
     this.trials = trials;
-    this.specific_chances = [];
-    this.specific_chances_hand_length = 0;
-    this.general_chances = [];
   }
 
   Optimal.prototype.rank_general_chances = function rank_general_chances() {
-    if (this.general_chances.length != 0) return this.general_chances;
     var cards = this.cards,
         decks = this.decks,
         trials = this.trials;
@@ -760,13 +756,11 @@ var Optimal = function () {
 
       var res = _ref14;
     }
-    this.general_chances = arr;
     return arr;
   };
 
   Optimal.prototype.rank_specific_chances = function rank_specific_chances(myknown) {
 
-    if (this.specific_chances_hand_length == myknown && this.specific_chances.length != 0) return this.specific_chances;
     this.specific_ranks_dict = {};
 
     var results = this.specific_ranks_dict;
@@ -821,11 +815,8 @@ var Optimal = function () {
 
       if (res[0] >= .01) console.log('spe ' + res[0] + '% chance ' + res[1]);
     }
-    this.specific_chances = arr;
-    this.specific_chances_hand_length = myknown;
-    return arr;
 
-    return [[.4, 'HI']];
+    return arr;
   };
 
   Optimal.prototype.rank_specific_chances_helper = function rank_specific_chances_helper(hand) {
@@ -1163,7 +1154,7 @@ var Bar_Graph = function (_React$Component2) {
   }
 
   Bar_Graph.prototype.render = function render() {
-    var results = this.props.data_func();
+    var results = this.props.data;
     return React.createElement(
       'div',
       { className: 'bar_graph' },
@@ -1175,20 +1166,24 @@ var Bar_Graph = function (_React$Component2) {
           null,
           this.props.name,
           ' '
-        ),
-        this.props.description.split("\n").map(function (i) {
-          return React.createElement(
-            'p',
-            { className: 'bar_description' },
-            i
-          );
-        })
+        )
       ),
       React.createElement(
         'section',
         { className: 'graph' },
         results.map(function (result) {
           return React.createElement(Bar, { percent: result[0].toFixed(3), description: result[1] });
+        })
+      ),
+      React.createElement(
+        'div',
+        null,
+        this.props.description.split("\n").map(function (i) {
+          return React.createElement(
+            'p',
+            { className: 'bar_description' },
+            i
+          );
         })
       )
     );
@@ -1223,10 +1218,6 @@ var Hand_Options = function (_React$Component3) {
   }
 
   Hand_Options.prototype.cardAdded = function cardAdded(num, suit) {
-    if (this.state.hand.length >= default_cards) {
-      alert('Hand cannot be larger than number of total cards');
-    }
-
     this.state.hand.decks = default_decks;
     this.state.hand.safe_add(new Card(num, suit));
     this.setState({ hand: this.state.hand });
@@ -1235,10 +1226,6 @@ var Hand_Options = function (_React$Component3) {
   Hand_Options.prototype.cardRemoved = function cardRemoved(num, suit) {
     this.state.hand.remove(new Card(num, suit));
     this.setState({ hand: this.state.hand });
-  };
-
-  Hand_Options.prototype.run = function run() {
-    this.props.callbackParent(this.state.hand);
   };
 
   Hand_Options.prototype.render = function render() {
@@ -1265,16 +1252,6 @@ var Hand_Options = function (_React$Component3) {
           React.createElement(HandCardSetIcon, { cb: this.cardRemoved.bind(this), cards: this.state.hand.cards })
         ),
         React.createElement('br', null),
-        React.createElement(
-          'div',
-          { className: 'handbtn-wrapper' },
-          React.createElement(
-            'button',
-            { className: ' btn btn-success', onClick: this.run.bind(this) },
-            'Calculate'
-          )
-        ),
-        React.createElement('br', null),
         React.createElement('br', null),
         React.createElement(HandCardSetIcon, { cb: this.cardAdded.bind(this), cards: default_hand_choices.cards.slice(0, 13) }),
         React.createElement(HandCardSetIcon, { cb: this.cardAdded.bind(this), cards: default_hand_choices.cards.slice(13, 26) }),
@@ -1293,38 +1270,21 @@ var Deck_Options = function (_React$Component4) {
   function Deck_Options() {
     _classCallCheck(this, Deck_Options);
 
-    var _this4 = _possibleConstructorReturn(this, _React$Component4.call(this));
-
-    _this4.state = {
-      cards: default_cards,
-      decks: default_decks,
-      trials: default_trials
-    };
-    return _this4;
+    return _possibleConstructorReturn(this, _React$Component4.apply(this, arguments));
   }
-
-  Deck_Options.prototype.clicked = function clicked() {
-    if (this.state.cards < 5) alert('Error: total cards must be at least 5');else if (this.state.cards > this.state.decks * 52) alert('Error: total cards cannot be more than number of decks * 52');else {
-      var newState = this.state;
-      this.props.callbackParent(newState);
-    }
-  };
 
   Deck_Options.prototype.handleCardsChange = function handleCardsChange(event) {
     var value = parseInt(event.target.value);
-    this.setState({ cards: value });
     default_cards = value;
   };
 
   Deck_Options.prototype.handleDecksChange = function handleDecksChange(event) {
     var value = parseInt(event.target.options[event.target.selectedIndex].value);
-    this.setState({ decks: value });
     default_decks = value;
   };
 
   Deck_Options.prototype.handleTrialsChange = function handleTrialsChange(event) {
     var value = parseInt(event.target.options[event.target.selectedIndex].value);
-    this.setState({ trials: value });
     default_trials = value;
   };
 
@@ -1480,11 +1440,6 @@ var Deck_Options = function (_React$Component4) {
           t2,
           t3,
           t4
-        ),
-        React.createElement(
-          'button',
-          { className: 'settings btn btn-success', onClick: this.clicked.bind(this) },
-          ' Set '
         )
       )
     );
@@ -1499,25 +1454,11 @@ var Known_Option = function (_React$Component5) {
   function Known_Option() {
     _classCallCheck(this, Known_Option);
 
-    var _this5 = _possibleConstructorReturn(this, _React$Component5.call(this));
-
-    _this5.state = {
-      known: default_known
-    };
-    return _this5;
+    return _possibleConstructorReturn(this, _React$Component5.apply(this, arguments));
   }
-
-  Known_Option.prototype.clicked = function clicked() {
-    if (this.state.known <= 0) {
-      alert('Error: known cards must be greater than 0');
-    } else if (this.state.known > default_cards) {
-      alert('Error: known cards cannot be greater than total cards');
-    } else this.props.callbackParent(default_known);
-  };
 
   Known_Option.prototype.handleKnownCardsChange = function handleKnownCardsChange(event) {
     var value = parseInt(event.target.value);
-    this.setState({ known: value });
     default_known = value;
   };
 
@@ -1543,12 +1484,7 @@ var Known_Option = function (_React$Component5) {
           { className: 'mr-sm-2' },
           'Known'
         ),
-        React.createElement('input', { defaultValue: default_known, onChange: this.handleKnownCardsChange.bind(this), type: 'number', className: 'num_input form-control mb-2 mr-sm-2 mb-sm-0' }),
-        React.createElement(
-          'button',
-          { className: 'settings btn btn-success', onClick: this.clicked.bind(this) },
-          ' Set '
-        )
+        React.createElement('input', { defaultValue: default_known, onChange: this.handleKnownCardsChange.bind(this), type: 'number', className: 'num_input form-control mb-2 mr-sm-2 mb-sm-0' })
       )
     );
   };
@@ -1566,42 +1502,65 @@ var Calculator = function (_React$Component6) {
 
     _this6.state = {
       page: 'about',
-      cards: default_cards,
-      decks: default_decks,
-      trials: default_trials,
-      known: default_known,
-      hand: default_hand,
-      opt: new Optimal(default_cards, default_decks, default_trials)
+      data: []
     };
     return _this6;
   }
 
-  Calculator.prototype.onDeckChanged = function onDeckChanged(newState) {
-    this.setState({ cards: newState.cards,
-      decks: newState.decks,
-      trials: newState.trials,
-      opt: new Optimal(newState.cards, newState.decks, newState.trials)
-    });
-  };
+  Calculator.prototype.run = function run() {
+    var opt = new Optimal(default_cards, default_decks, default_trials);
+    var data = [];
+    if (default_cards < 5) {
+      alert('Error: total cards must be at least 5');
+      return;
+    } else if (default_cards > default_decks * 52) {
+      alert('Error: total cards cannot be more than number of decks * 52');
+      return;
+    }
 
-  Calculator.prototype.onKnownChanged = function onKnownChanged(known) {
-    this.setState({ known: known });
-  };
+    if (this.state.page == 'general') {
 
-  Calculator.prototype.onHandChanged = function onHandChanged(hand) {
-    this.setState({ hand: hand });
+      data = opt.rank_general_chances();
+    } else if (this.state.page == 'specific') {
+      if (default_known <= 0) {
+        alert('Error: known cards must be greater than 0');
+        return;
+      } else if (default_known > default_cards) {
+        alert('Error: known cards cannot be greater than total cards');
+        return;
+      }
+      data = opt.rank_specific_chances(default_known);
+    } else if (this.state.page == 'play') {
+      if (default_hand.length >= default_cards) {
+        alert('Error: hand cannot be larger than number of total cards');
+        return;
+      }
+      data = opt.find_best_play(default_hand);
+    }
+    this.setState({ data: data });
   };
 
   Calculator.prototype.onPageChanged = function onPageChanged(page) {
-    this.setState({ page: page });
+    this.setState({ page: page, data: [] });
   };
 
   Calculator.prototype.render = function render() {
-    var remaining = this.state.cards - this.state.known;
+    var remaining = default_cards - default_known;
     var deck_word = 'deck';
     if (this.state.decks > 1) deck_word = this.state.decks + ' decks';
-    var deck_opts = React.createElement(Deck_Options, { callbackParent: this.onDeckChanged.bind(this)
-    });
+    var deck_opts = React.createElement(Deck_Options, null);
+    var run_button = React.createElement(
+      'div',
+      { className: 'run' },
+      React.createElement(
+        'button',
+        { className: 'btn-success btn btn-block', onClick: this.run.bind(this) },
+        'Calculate'
+      )
+    );
+    var spe_des = 'Here are odds that a set of ' + default_cards + " cards from " + default_decks + " decks contains the particular BS call from each category which has the highest chance of occuring, based on the " + default_known + " known cards. \nFor each of " + default_trials + " trials, the program chose a psuedorandom hand of " + default_known + ' cards from the ' + deck_word + " and call the most likely BS call from each combination. For example, when the hand contained a large number of fives, the program called 4 of a kind fives rather than 4 of a kind sixes for the four of a kind combination. Then the program added a psuedorandom set of " + remaining + " cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards.";
+    var best_des = 'Here are BS calls which have the highest chance of being true, given  a set of ' + default_cards + " cards from " + default_decks + " decks which includes the hand " + default_cards.toString() + " selected above. \nFor each of " + default_trials + " trials, the program added a psuedorandom set of  " + remaining + " cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards.";
+    var gen_des = 'Here are odds that a set of ' + default_cards + " cards from the " + deck_word + " contains each BS combination (four of a kind, any flush, any straight, etc). \nFor each of " + default_trials + " trials, the program chose a psuedorandom set of " + default_cards + ' cards from the ' + deck_word + " and judged whether the set contained each particular combition. \nIf a particular combination is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards.";
     var main = '';
 
     switch (this.state.page) {
@@ -1614,9 +1573,10 @@ var Calculator = function (_React$Component6) {
           null,
           ' ',
           deck_opts,
-          React.createElement(Bar_Graph, { data_func: this.state.opt.rank_general_chances.bind(this.state.opt),
+          run_button,
+          React.createElement(Bar_Graph, { data: this.state.data,
             name: 'General Chances',
-            description: 'Here are odds that a set of ' + this.state.cards + " cards from the " + deck_word + " contains each BS combination (four of a kind, any flush, any straight, etc). \nFor each of " + this.state.trials + " trials, the program chose a psuedorandom set of " + this.state.cards + ' cards from the ' + deck_word + " and judged whether the set contained each particular combition. \nIf a particular combination is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards." })
+            description: gen_des })
         );
         break;
       case 'specific':
@@ -1624,10 +1584,11 @@ var Calculator = function (_React$Component6) {
           'div',
           null,
           deck_opts,
-          React.createElement(Known_Option, { callbackParent: this.onKnownChanged.bind(this) }),
-          React.createElement(Bar_Graph, { data_func: this.state.opt.rank_specific_chances.bind(this.state.opt, this.state.known),
+          React.createElement(Known_Option, null),
+          run_button,
+          React.createElement(Bar_Graph, { data: this.state.data,
             name: 'Specific Chances',
-            description: 'Here are odds that a set of ' + this.state.cards + " cards from " + this.state.decks + " decks contains the particular BS call from each category which has the highest chance of occuring, based on the " + this.state.known + " known cards. \nFor each of " + this.state.trials + " trials, the program chose a psuedorandom hand of " + this.state.known + ' cards from the ' + deck_word + " and call the most likely BS call from each combination. For example, when the hand contained a large number of fives, the program called 4 of a kind fives rather than 4 of a kind sixes for the four of a kind combination. Then the program added a psuedorandom set of " + remaining + " cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards." })
+            description: spe_des })
         );
         break;
       case 'play':
@@ -1635,10 +1596,11 @@ var Calculator = function (_React$Component6) {
           'div',
           null,
           deck_opts,
-          React.createElement(Hand_Options, { callbackParent: this.onHandChanged.bind(this) }),
-          React.createElement(Bar_Graph, { data_func: this.state.opt.find_best_play.bind(this.state.opt, this.state.hand),
+          React.createElement(Hand_Options, null),
+          run_button,
+          React.createElement(Bar_Graph, { data: this.state.data,
             name: 'Best Plays',
-            description: 'Here are BS calls which have the highest chance of being true, given  a set of ' + this.state.cards + " cards from " + this.state.decks + " decks which includes the hand selected above. \nFor each of " + this.state.trials + " trials, the program added a psuedorandom set of  " + remaining + " cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards." })
+            description: best_des })
         );
         break;
     }

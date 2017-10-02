@@ -868,21 +868,19 @@ class Bar extends React.Component{
 
 class Bar_Graph extends React.Component {
   render() {
-    let results=this.props.data
+    let results=this.props.data_func()
     return  <div className='bar_graph'>
       <div className="title">
         <h1>{this.props.name} </h1>
+        {this.props.description.split("\n").map(i => {
+            return <p className='bar_description'>{i}</p>;
+        })}
       </div>
       <section className="graph">
         { results.map(function(result){
           return <Bar percent={result[0].toFixed(3)} description={result[1]} />;
         }) }
       </section>
-      <div>
-         {this.props.description.split("\n").map(i => {
-            return <p className='bar_description'>{i}</p>;
-        })}
-      </div>
     </div>
   }
 
@@ -907,6 +905,10 @@ class Hand_Options extends React.Component{
   }
 
   cardAdded(num,suit){
+    if(this.state.hand.length>=default_cards){
+      alert('Hand cannot be larger than number of total cards')
+    }
+
     this.state.hand.decks=default_decks
     this.state.hand.safe_add(new Card(num,suit))
     this.setState({hand:this.state.hand})
@@ -925,6 +927,7 @@ class Hand_Options extends React.Component{
       <div id='myhand'>
        <HandCardSetIcon cb={this.cardRemoved.bind(this)} cards={this.state.hand.cards} />
         </div>
+      <br/>
       <br/>
       <br/>
       <HandCardSetIcon cb={this.cardAdded.bind(this)} cards={default_hand_choices.cards.slice(0,13)} />
@@ -1014,6 +1017,11 @@ class Deck_Options extends React.Component{
 
 
 class Known_Option extends React.Component{
+  constructor() {
+    super()
+  }
+
+
   handleKnownCardsChange (event) {
     let value=parseInt(event.target.value)
     default_known=value
@@ -1022,11 +1030,15 @@ class Known_Option extends React.Component{
   render() {
     return <div className='deck_options jumbotron'>
       <h1>Known Cards</h1>
+
         <p>Out of the total cards, how many do you know about?</p>
+
       <div className="form-inline deck">
 
         <label className="mr-sm-2" >Known</label>
         <input defaultValue={default_known} onChange={this.handleKnownCardsChange.bind(this)} type="number" className="num_input form-control mb-2 mr-sm-2 mb-sm-0" />
+        <button className='settings btn btn-success' onClick={this.clicked.bind(this)}> Set </button>
+
       </div>
     </div>
   }
@@ -1054,7 +1066,6 @@ class Calculator extends React.Component {
     }
 
     if(this.state.page=='general'){
-
         data=opt.rank_general_chances()
     }
 
@@ -1070,11 +1081,7 @@ class Calculator extends React.Component {
         data=opt.rank_specific_chances(default_known)
     }
 
-    else if(this.state.page=='play'){
-        if(default_hand.length>=default_cards){
-        alert('Error: hand cannot be larger than number of total cards')
-         return
-      }
+    else if(this.state.page=='best'){
         data=opt.find_best_play(default_hand)
     }
     this.setState({data: data })
@@ -1086,47 +1093,41 @@ class Calculator extends React.Component {
 
 
   render(){
-    let remaining=default_cards - default_known
+    let remaining=this.state.cards - this.state.known
     let deck_word='deck'
     if(this.state.decks>1)
       deck_word=this.state.decks+' decks'
-    let deck_opts=<Deck_Options />
-    let run_button= <div className='run'><button className='btn-success btn btn-block' onClick={this.run.bind(this)}>Calculate</button></div>
-    let spe_des='Here are odds that a set of '+default_cards+
-          " cards from "+default_decks+" decks contains the particular BS call from each category which has the highest chance of occuring, based on the "+default_known+" known cards. \nFor each of "+default_trials+" trials, the program chose a psuedorandom hand of "+default_known+' cards from the '+deck_word+" and call the most likely BS call from each combination. For example, when the hand contained a large number of fives, the program called 4 of a kind fives rather than 4 of a kind sixes for the four of a kind combination. Then the program added a psuedorandom set of "+remaining+" cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards."
-    let best_des='Here are BS calls which have the highest chance of being true, given  a set of '+default_cards+
-          " cards from "+default_decks+" decks which includes the hand "+default_cards.toString()
-            +" selected above. \nFor each of "+default_trials+" trials, the program added a psuedorandom set of  "+remaining+" cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards."
-    let gen_des='Here are odds that a set of '+default_cards+
-          " cards from the "+deck_word+" contains each BS combination (four of a kind, any flush, any straight, etc). \nFor each of "+default_trials+" trials, the program chose a psuedorandom set of "+default_cards+' cards from the '+deck_word+" and judged whether the set contained each particular combition. \nIf a particular combination is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards."
+    let deck_opts=<Deck_Options callbackParent={this.onDeckChanged.bind(this)}
+    let calc=<button className='btn-success btn' onClick={run.bind(this)}>Calculate </button>
+       />
     let main=''
 
     switch(this.state.page){
       case 'about': main=<Rules />
       break
        case 'general': main=<div> {deck_opts}
-        {run_button}
         <Bar_Graph data={this.state.data}
         name='General Chances'
-        description={gen_des} />
+        description={'Here are odds that a set of '+this.state.cards+
+          " cards from the "+deck_word+" contains each BS combination (four of a kind, any flush, any straight, etc). \nFor each of "+this.state.trials+" trials, the program chose a psuedorandom set of "+this.state.cards+' cards from the '+deck_word+" and judged whether the set contained each particular combition. \nIf a particular combination is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards."} />
          </div>
          break
         case 'specific': main=<div>
          {deck_opts}
-        < Known_Option />
-         {run_button}
+        < Known_Option callbackParent={this.onKnownChanged.bind(this)} />
          <Bar_Graph data={this.state.data}
         name='Specific Chances'
-           description={spe_des} />
+           description={'Here are odds that a set of '+this.state.cards+
+          " cards from "+this.state.decks+" decks contains the particular BS call from each category which has the highest chance of occuring, based on the "+this.state.known+" known cards. \nFor each of "+this.state.trials+" trials, the program chose a psuedorandom hand of "+this.state.known+' cards from the '+deck_word+" and call the most likely BS call from each combination. For example, when the hand contained a large number of fives, the program called 4 of a kind fives rather than 4 of a kind sixes for the four of a kind combination. Then the program added a psuedorandom set of "+remaining+" cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards."} />
          </div>
          break
          case 'play':  main=<div>
          {deck_opts}
          <Hand_Options  />
-         {run_button}
       <Bar_Graph data={this.state.data}
         name='Best Plays'
-        description={best_des} />
+        description={'Here are BS calls which have the highest chance of being true, given  a set of '+this.state.cards+
+          " cards from "+this.state.decks+" decks which includes the hand selected above. \nFor each of "+this.state.trials+" trials, the program added a psuedorandom set of  "+remaining+" cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards."} />
          </div>
          break
    }
