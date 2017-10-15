@@ -229,7 +229,6 @@ var Card_Set = function () {
   };
 
   Card_Set.prototype.hasFullHouse = function hasFullHouse(triple, double) {
-
     var num_of_triple = 0;
     var num_of_double = 0;
     var num_wild = 0;
@@ -247,7 +246,7 @@ var Card_Set = function () {
 
       var card = _ref4;
 
-      if (card.num == 0) num_wild += 1;else if (card.num == 1) num_of_double += 1;else num_of_triple += 1;
+      if (card.num == 0) num_wild += 1;else if (card.num == triple) num_of_triple += 1;else if (card.num == double) num_of_double += 1;
     }
     var missing = Math.max(2 - num_of_double, 0) + Math.max(3 - num_of_triple, 0);
     return num_wild >= missing;
@@ -356,6 +355,7 @@ var Card_Set = function () {
 
       var suit = card.suit;
       var num = card.num;
+      if (num > high) continue;
       if (num == 0 || suit == wanted_suit) suit_count += 1;
       if (num == 0 || suit == wanted_suit && high == num) has_high = true;
     }
@@ -459,6 +459,11 @@ var Card_Set = function () {
   };
 
   Card_Set.prototype.top_expected_straight = function top_expected_straight(length) {
+    if (length == 0) {
+      alert("length is 0");
+      throw 'error: length=0 for top expected straight';
+    }
+
     var arr = [];
     for (var i = 0; i < 13; ++i) {
       arr.push(false);
@@ -481,23 +486,37 @@ var Card_Set = function () {
     var max_length = 0;
     var current_length = 0;
     //try start at ace
-    for (var x = 12; x < 12 + length; x++) {
+    for (var x = 12; x < length + 12; x++) {
       if (arr[x % 13]) {
         current_length += 1;
-        if (max_length <= current_length) max_length = current_length;
+        if (max_length <= current_length) {
+          max_length = current_length;
+        }
       }
-    }for (var x = length - 12; x < 12; x++) {
-      if (arr[x - length]) current_length -= 1;
-      if (arr[x]) current_length += 1;
+    }for (var x = length + 12; x < length + 24; x++) {
+      if (arr[(x - length) % 13]) {
+        current_length -= 1;
+        //alert('removed'+Card.card_num_to_str((x-length)%13)+
+        //     'for new length '+current_length.toString())
+      }
+      if (arr[x % 13]) {
 
-      if (max_length <= current_length) {
+        current_length += 1;
+        // alert('added'+Card.card_num_to_str(x%13)+
+        //     'for new length '+current_length.toString())
+      }
+      if (max_length < current_length) {
         max_length = current_length;
         low_index = x - length + 1;
+        // alert("neww low"+Card.card_num_to_str(low_index%13)+
+        //      'for new length '+current_length.toString())
       }
     }
+
     //should never be 0
-    if (low_index == 0) low_index += 1;
-    var high = low_index + length - 1;
+    // alert(Card.card_num_to_str(low_index%13))
+    if (low_index % 13 == 0) low_index += 1;
+    var high = (low_index + length - 1) % 13;
     return [high, max_length];
   };
 
@@ -629,6 +648,7 @@ var Card_Set = function () {
         best_high = high;
       }
     }
+
     return [best_suit, best_high, best_length];
   };
 
@@ -776,7 +796,7 @@ var Optimal = function () {
 
     for (var i = 5; i <= 13; i++) {
       results[i + " long straight, specified high"] = 0;
-      results[i + " long straight flush, specified high"] = 0;
+      results[i + " long straight flush, specified suit and high"] = 0;
     }
 
     var num_hands = Math.sqrt(this.trials);
@@ -867,12 +887,12 @@ var Optimal = function () {
         straight_flush_arr = [];
     var results = this.specific_ranks_dict;
     for (var x = 5; x <= 13; x++) {
-      var _cards$top_expected_s = cards.top_expected_straight(length);
+      var _cards$top_expected_s = cards.top_expected_straight(x);
 
       var high = _cards$top_expected_s[0];
       var _2 = _cards$top_expected_s[1];
 
-      var _cards$top_expected_s2 = cards.top_expected_straight_flush(length);
+      var _cards$top_expected_s2 = cards.top_expected_straight_flush(x);
 
       var suit = _cards$top_expected_s2[0];
       var fhigh = _cards$top_expected_s2[1];
@@ -890,12 +910,15 @@ var Optimal = function () {
           longest_straight_flush = 1;
       var curr_length = 5;
       while (card_set.hasSpecificStraight(curr_length, straight_arr[curr_length - 5])) {
+
         longest_straight = curr_length;
         curr_length += 1;
       }
       //temp
       curr_length = 5;
-      while (card_set.hasSpecificStraightFlush(curr_length, straight_flush_arr[curr_length - 5][1], straight_flush_arr[curr_length - 5][0])) {
+
+      while (card_set.hasSpecificStraightFlush(curr_length, straight_flush_arr[curr_length - 5][0], straight_flush_arr[curr_length - 5][1])) {
+
         longest_straight_flush = curr_length;
         curr_length += 1;
       }
@@ -907,6 +930,7 @@ var Optimal = function () {
 
       var longest_of_kind = card_set.numSpecificOfAKind(best_kind);
       var longest_flush = card_set.numSpecificFlush(best_suit, best_flush_high);
+
       //ace high
       var longest_flush_alt = card_set.numSpecificFlush(best_suit, 10);
 
@@ -981,13 +1005,14 @@ var Optimal = function () {
 
     var straight_arr = [],
         straight_flush_arr = [];
+
     for (var x = 5; x <= 13; x++) {
-      var _cards$top_expected_s3 = cards.top_expected_straight(length);
+      var _cards$top_expected_s3 = cards.top_expected_straight(x);
 
       var high = _cards$top_expected_s3[0];
       var _3 = _cards$top_expected_s3[1];
 
-      var _cards$top_expected_s4 = cards.top_expected_straight_flush(length);
+      var _cards$top_expected_s4 = cards.top_expected_straight_flush(x);
 
       var suit = _cards$top_expected_s4[0];
       var fhigh = _cards$top_expected_s4[1];
@@ -996,6 +1021,7 @@ var Optimal = function () {
       straight_arr.push(high);
       straight_flush_arr.push([suit, fhigh]);
     }
+    //alert(Card.card_num_to_str(straight_arr[1]))
 
     var _cards$top_of_two_kin2 = cards.top_of_two_kinds();
 
@@ -1053,7 +1079,8 @@ var Optimal = function () {
       var longest_of_kind = card_set.numSpecificOfAKind(best_kind);
       var longest_flush = card_set.numSpecificFlush(best_suit, best_flush_high);
       //ace high
-      var longest_flush_alt = card_set.numSpecificFlush(best_suit, 10);
+      var longest_flush_alt = 0;
+      if (best_flush_high != 12) longest_flush_alt = card_set.numSpecificFlush(best_suit, 12);
 
       for (var i = 2; i <= longest_of_kind; i++) {
         var target = i + " of a kind " + Card.card_num_to_str(best_kind);
@@ -1112,16 +1139,281 @@ var Optimal = function () {
     return arr.reverse();
   };
 
+  Optimal.prototype.find_bs_chance = function find_bs_chance(_ref19) {
+    var call = _ref19.call;
+    var length = _ref19.length;
+    var suit = _ref19.suit;
+    var primary = _ref19.primary;
+    var secondary = _ref19.secondary;
+    var hand = _ref19.hand;
+
+    if (hand.length <= 0) throw 'Error: hand too small';
+
+    if (this.cards - hand.length < 0) throw 'Error: hand too large';
+
+    var cards = hand,
+        decks = this.decks,
+        trials = this.trials;
+    //alert(cards.toString())
+    var deck = new Card_Set();
+
+    //fill up card set
+    deck.fill_decks(decks);
+
+    for (var _iterator18 = cards.cards, _isArray18 = Array.isArray(_iterator18), _i18 = 0, _iterator18 = _isArray18 ? _iterator18 : _iterator18[Symbol.iterator]();;) {
+      var _ref20;
+
+      if (_isArray18) {
+        if (_i18 >= _iterator18.length) break;
+        _ref20 = _iterator18[_i18++];
+      } else {
+        _i18 = _iterator18.next();
+        if (_i18.done) break;
+        _ref20 = _i18.value;
+      }
+
+      var card = _ref20;
+
+      deck.remove(card);
+    }var count = 0;
+
+    var key = '';
+    switch (call) {
+      case 'kind':
+        key = length + " of a kind " + Card.card_num_to_str(primary);
+        break;
+      case 'flush':
+        key = length + " long " + Card.suit_num_to_str(suit) + " flush, " + Card.card_num_to_str(primary) + ' high';
+
+        break;
+      case 'straight':
+        key = length + " long straight, " + Card.card_num_to_str(primary) + " high";
+
+        break;
+      case 'straightflush':
+        key = length + " long straight " + Card.suit_num_to_str(suit) + " flush, " + Card.card_num_to_str(primary) + " high";
+
+        break;
+      case 'house':
+        key = "Full house, " + Card.card_num_to_str(primary) + ' on ' + Card.card_num_to_str(secondary);
+        break;
+    }
+    for (var trial = 0; trial < trials; ++trial) {
+      var card_set_addition = deck.getCards(this.cards - hand.length);
+      var card_set = new Card_Set(cards.cards.concat(card_set_addition.cards));
+      switch (call) {
+        case 'kind':
+          if (card_set.hasSpecificOfAKind(length, primary)) count += 1;
+          break;
+        case 'flush':
+          if (card_set.hasSpecificFlush(length, suit, primary)) count += 1;
+          break;
+        case 'straight':
+          if (card_set.hasSpecificStraight(length, primary)) count += 1;
+          break;
+        case 'straightflush':
+          if (card_set.hasSpecificStraightFlush(length, suit, primary)) count += 1;
+          break;
+        case 'house':
+          if (card_set.hasFullHouse(primary, secondary)) count += 1;
+          break;
+      }
+    }
+
+    var arr = [[count * 100.0 / trials, key]];
+    return arr;
+  };
+
   return Optimal;
 }();
 
-var Bar = function (_React$Component) {
-  _inherits(Bar, _React$Component);
+var tut1 = new Card_Set();
+tut1.add(new Card(3, 2));
+tut1.add(new Card(7, 0));
+tut1.add(new Card(8, 0));
+tut1.add(new Card(9, 1));
+tut1.add(new Card(0, 3));
+tut1.add(new Card(11, 2));
+tut1.add(new Card(12, 1));
+
+var tut2 = new Card_Set();
+tut2.add(new Card(0, 3));
+tut2.add(new Card(0, 2));
+tut2.add(new Card(11, 1));
+tut2.add(new Card(12, 3));
+tut2.add(new Card(12, 2));
+tut2.add(new Card(12, 1));
+
+var tut3 = new Card_Set();
+tut3.add(new Card(0, 3));
+tut3.add(new Card(1, 3));
+tut3.add(new Card(4, 3));
+tut3.add(new Card(10, 3));
+tut3.add(new Card(11, 3));
+tut3.add(new Card(12, 3));
+
+var tut4 = new Card_Set();
+tut4.add(new Card(0, 3));
+tut4.add(new Card(1, 1));
+tut4.add(new Card(1, 3));
+tut4.add(new Card(2, 2));
+tut4.add(new Card(7, 1));
+
+var Rules = function (_React$Component) {
+  _inherits(Rules, _React$Component);
+
+  function Rules() {
+    _classCallCheck(this, Rules);
+
+    return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
+  }
+
+  Rules.prototype.render = function render() {
+    return React.createElement(
+      'div',
+      { className: 'rules jumbotron' },
+      React.createElement(
+        'h1',
+        null,
+        'How To'
+      ),
+      React.createElement(
+        'h3',
+        null,
+        'Rules'
+      ),
+      React.createElement(
+        'ul',
+        null,
+        React.createElement(
+          'li',
+          null,
+          'Every player starts with 2 cards.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'The players take turns going clockwise. Each turn, a player can call a higher hand or call BS on the previously called hand.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'The player who lost a card gets to go first, or if that player is out, the next player goes first.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'Players may only see their own hand but are calling hands regarding the cards pooled together by all players.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'When a player calls BS, all players reveal their cards and sees whether the hand can be formed from 5 or more of the total cards'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'If the hand exists, the BS failed and the player who called BS gains a card.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'If the hand doesn\'t exist, the BS succeeded and the player who called the hand gains a card.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'The person who lost starts the next round.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'A player is out when they have 6 cards in their hand.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'The game continues until only one player is left.'
+        )
+      ),
+      React.createElement(
+        'h3',
+        null,
+        'Hands'
+      ),
+      React.createElement(
+        'ul',
+        null,
+        React.createElement(
+          'li',
+          null,
+          'Jokers are not part of the deck.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          '2\'s are wild cards which can be substituted for any rank or suit.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'All regular poker hands are valid.'
+        ),
+        React.createElement(
+          'li',
+          null,
+          'Straights, flushes, straight flushes, and of a kinds can extend beyond 5 cards'
+        )
+      ),
+      React.createElement(
+        'h3',
+        null,
+        'Examples'
+      ),
+      React.createElement(
+        'ul',
+        null,
+        React.createElement(
+          'li',
+          null,
+          ' The following contains a 6 long straight Ace high, because the wild card 2 can act as a queen.',
+          React.createElement(CardSetIcon, { cards: tut1.cards })
+        ),
+        React.createElement('br', null),
+        React.createElement(
+          'li',
+          null,
+          ' The following does not contain a full house, 3 on 9. The wild card may act as either the third 3 or the second 9, but it cannot be both.',
+          React.createElement(CardSetIcon, { cards: tut4.cards })
+        ),
+        React.createElement('br', null),
+        React.createElement(
+          'li',
+          null,
+          ' The following contains an Ace five of a kind, thanks to double wilds.',
+          React.createElement(CardSetIcon, { cards: tut2.cards })
+        ),
+        React.createElement('br', null),
+        React.createElement(
+          'li',
+          null,
+          ' The following does not contain a hearts flush, Queen high. While there are enough hearts, only 4 are capable of being equal or below Queen (2, 3, 6, and Q).',
+          React.createElement(CardSetIcon, { cards: tut3.cards })
+        )
+      )
+    );
+  };
+
+  return Rules;
+}(React.Component);
+
+var Bar = function (_React$Component2) {
+  _inherits(Bar, _React$Component2);
 
   function Bar() {
     _classCallCheck(this, Bar);
 
-    return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
+    return _possibleConstructorReturn(this, _React$Component2.apply(this, arguments));
   }
 
   Bar.prototype.render = function render() {
@@ -1144,13 +1436,13 @@ var Bar = function (_React$Component) {
   return Bar;
 }(React.Component);
 
-var Bar_Graph = function (_React$Component2) {
-  _inherits(Bar_Graph, _React$Component2);
+var Bar_Graph = function (_React$Component3) {
+  _inherits(Bar_Graph, _React$Component3);
 
   function Bar_Graph() {
     _classCallCheck(this, Bar_Graph);
 
-    return _possibleConstructorReturn(this, _React$Component2.apply(this, arguments));
+    return _possibleConstructorReturn(this, _React$Component3.apply(this, arguments));
   }
 
   Bar_Graph.prototype.render = function render() {
@@ -1203,18 +1495,18 @@ default_hand.add(new Card(3, 3));
 var default_hand_choices = new Card_Set();
 default_hand_choices.fill_decks_no_shuffle(1);
 
-var Hand_Options = function (_React$Component3) {
-  _inherits(Hand_Options, _React$Component3);
+var Hand_Options = function (_React$Component4) {
+  _inherits(Hand_Options, _React$Component4);
 
   function Hand_Options() {
     _classCallCheck(this, Hand_Options);
 
-    var _this3 = _possibleConstructorReturn(this, _React$Component3.call(this));
+    var _this4 = _possibleConstructorReturn(this, _React$Component4.call(this));
 
-    _this3.state = {
+    _this4.state = {
       hand: default_hand
     };
-    return _this3;
+    return _this4;
   }
 
   Hand_Options.prototype.cardAdded = function cardAdded(num, suit) {
@@ -1264,13 +1556,13 @@ var Hand_Options = function (_React$Component3) {
   return Hand_Options;
 }(React.Component);
 
-var Deck_Options = function (_React$Component4) {
-  _inherits(Deck_Options, _React$Component4);
+var Deck_Options = function (_React$Component5) {
+  _inherits(Deck_Options, _React$Component5);
 
   function Deck_Options() {
     _classCallCheck(this, Deck_Options);
 
-    return _possibleConstructorReturn(this, _React$Component4.apply(this, arguments));
+    return _possibleConstructorReturn(this, _React$Component5.apply(this, arguments));
   }
 
   Deck_Options.prototype.handleCardsChange = function handleCardsChange(event) {
@@ -1448,13 +1740,13 @@ var Deck_Options = function (_React$Component4) {
   return Deck_Options;
 }(React.Component);
 
-var Known_Option = function (_React$Component5) {
-  _inherits(Known_Option, _React$Component5);
+var Known_Option = function (_React$Component6) {
+  _inherits(Known_Option, _React$Component6);
 
   function Known_Option() {
     _classCallCheck(this, Known_Option);
 
-    return _possibleConstructorReturn(this, _React$Component5.apply(this, arguments));
+    return _possibleConstructorReturn(this, _React$Component6.apply(this, arguments));
   }
 
   Known_Option.prototype.handleKnownCardsChange = function handleKnownCardsChange(event) {
@@ -1492,19 +1784,274 @@ var Known_Option = function (_React$Component5) {
   return Known_Option;
 }(React.Component);
 
-var Calculator = function (_React$Component6) {
-  _inherits(Calculator, _React$Component6);
+var default_length = 5;
+var default_suit = 0;
+var default_primary_rank = 2;
+var default_secondary_rank = 3;
+var default_call = 'kind';
+
+var Call_Picker = function (_React$Component7) {
+  _inherits(Call_Picker, _React$Component7);
+
+  function Call_Picker() {
+    _classCallCheck(this, Call_Picker);
+
+    var _this7 = _possibleConstructorReturn(this, _React$Component7.call(this));
+
+    _this7.state = {
+      call: default_call
+    };
+    return _this7;
+  }
+
+  Call_Picker.prototype.handlePrimaryRankChange = function handlePrimaryRankChange(event) {
+    var value = parseInt(event.target.value);
+    default_primary_rank = value;
+  };
+
+  Call_Picker.prototype.handleSecondaryRankChange = function handleSecondaryRankChange(event) {
+    var value = parseInt(event.target.value);
+    default_secondary_rank = value;
+  };
+
+  Call_Picker.prototype.handleSuitChange = function handleSuitChange(event) {
+    var value = parseInt(event.target.value);
+    default_suit = value;
+  };
+
+  Call_Picker.prototype.handleLengthChange = function handleLengthChange(event) {
+    var value = parseInt(event.target.value);
+    default_length = value;
+  };
+
+  Call_Picker.prototype.handleCallChange = function handleCallChange(event) {
+    var value = event.target.value;
+    default_call = value;
+    this.setState({ call: default_call });
+  };
+
+  Call_Picker.prototype.render = function render() {
+
+    var calls = [['kind', 'Number of a Kind'], ['flush', 'Flush'], ['straight', 'Straight'], ['straightflush', 'Straight Flush'], ['house', 'Full House']];
+    var length_button = React.createElement(
+      'div',
+      { className: 'form-inline' },
+      React.createElement(
+        'select',
+        { onChange: this.handleLengthChange.bind(this), className: 'custom-select mb-2 mr-sm-2 mb-sm-0' },
+        Array.apply(null, Array(15)).map(function (_, i) {
+          return default_length == i + 1 ? React.createElement(
+            'option',
+            { selected: true, value: i + 1 },
+            i + 1
+          ) : React.createElement(
+            'option',
+            { value: i + 1 },
+            i + 1
+          );
+        })
+      )
+    );
+    var suit_button = React.createElement(
+      'div',
+      { className: 'form-inline' },
+      React.createElement(
+        'select',
+        { onChange: this.handleSuitChange.bind(this), className: 'custom-select mb-2 mr-sm-2 mb-sm-0' },
+        Array.apply(null, Array(4)).map(function (_, i) {
+          return default_suit == i ? React.createElement(
+            'option',
+            { selected: true, value: i },
+            Card.suit_num_to_str(i)
+          ) : React.createElement(
+            'option',
+            { value: i },
+            Card.suit_num_to_str(i)
+          );
+        })
+      )
+    );
+    var primary_button = React.createElement(
+      'div',
+      { className: 'form-inline' },
+      React.createElement(
+        'select',
+        { onChange: this.handlePrimaryRankChange.bind(this), className: 'custom-select mb-2 mr-sm-2 mb-sm-0' },
+        Array.apply(null, Array(13)).map(function (_, i) {
+          return default_primary_rank == i ? React.createElement(
+            'option',
+            { selected: true, value: i },
+            Card.card_num_to_str(i)
+          ) : React.createElement(
+            'option',
+            { value: i },
+            Card.card_num_to_str(i)
+          );
+        })
+      )
+    );
+    var secondary_button = React.createElement(
+      'div',
+      { className: 'form-inline' },
+      React.createElement(
+        'select',
+        { onChange: this.handleSecondaryRankChange.bind(this), className: 'custom-select mb-2 mr-sm-2 mb-sm-0' },
+        Array.apply(null, Array(13)).map(function (_, i) {
+          return default_secondary_rank == i ? React.createElement(
+            'option',
+            { selected: true, value: i },
+            Card.card_num_to_str(i)
+          ) : React.createElement(
+            'option',
+            { value: i },
+            Card.card_num_to_str(i)
+          );
+        })
+      )
+    );
+
+    var myform = '';
+    if (default_call == 'kind') myform = React.createElement(
+      'div',
+      { className: 'form-inline' },
+      length_button,
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        ' of a kind rank '
+      ),
+      primary_button
+    );else if (default_call == 'house') myform = React.createElement(
+      'div',
+      { className: 'form-inline' },
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        'Triple '
+      ),
+      primary_button,
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        ' with double'
+      ),
+      secondary_button
+    );else if (default_call == 'straight') myform = React.createElement(
+      'div',
+      { className: 'form-inline' },
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        'Length '
+      ),
+      length_button,
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        ' straight with high '
+      ),
+      primary_button
+    );else if (default_call == 'flush') myform = React.createElement(
+      'div',
+      { className: 'form-inline' },
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        'Length '
+      ),
+      length_button,
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        ' suit '
+      ),
+      suit_button,
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        ' flush'
+      )
+    );else if (default_call == 'straightflush') myform = React.createElement(
+      'div',
+      { className: 'form-inline' },
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        'Length '
+      ),
+      length_button,
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        ' suit '
+      ),
+      suit_button,
+      React.createElement(
+        'label',
+        { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+        ' straight flush with high '
+      ),
+      primary_button
+    );
+
+    return React.createElement(
+      'div',
+      { className: 'jumbotron' },
+      React.createElement(
+        'h1',
+        null,
+        'Call Options'
+      ),
+      React.createElement(
+        'p',
+        null,
+        'What call do you want to investigate? Each call requires different additional input.'
+      ),
+      React.createElement(
+        'div',
+        null,
+        React.createElement(
+          'label',
+          { className: 'mr-sm-2', 'for': 'inlineFormCustomSelect' },
+          'Call'
+        ),
+        React.createElement(
+          'select',
+          { onChange: this.handleCallChange.bind(this), className: 'custom-select mb-2 mr-sm-2 mb-sm-0' },
+          calls.map(function (call) {
+            return default_call == call[0] ? React.createElement(
+              'option',
+              { selected: true, value: call[0] },
+              call[1]
+            ) : React.createElement(
+              'option',
+              { value: call[0] },
+              call[1]
+            );
+          })
+        )
+      ),
+      React.createElement('br', null),
+      myform
+    );
+  };
+
+  return Call_Picker;
+}(React.Component);
+
+var Calculator = function (_React$Component8) {
+  _inherits(Calculator, _React$Component8);
 
   function Calculator() {
     _classCallCheck(this, Calculator);
 
-    var _this6 = _possibleConstructorReturn(this, _React$Component6.call(this));
+    var _this8 = _possibleConstructorReturn(this, _React$Component8.call(this));
 
-    _this6.state = {
+    _this8.state = {
       page: 'about',
       data: []
     };
-    return _this6;
+    return _this8;
   }
 
   Calculator.prototype.run = function run() {
@@ -1536,6 +2083,18 @@ var Calculator = function (_React$Component6) {
         return;
       }
       data = opt.find_best_play(default_hand);
+    } else if (this.state.page == 'isBS') {
+      if (default_hand.length >= default_cards) {
+        alert('Error: hand cannot be larger than number of total cards');
+        return;
+      }
+      if (default_length < 5 && default_call != 'kind') {
+        alert('Error: length but be at least 5 for your call');
+        return;
+      }
+      data = opt.find_bs_chance({ hand: default_hand, call: default_call,
+        length: default_length, primary: default_primary_rank,
+        secondary: default_secondary_rank, suit: default_suit });
     }
     this.setState({ data: data });
   };
@@ -1561,6 +2120,7 @@ var Calculator = function (_React$Component6) {
     var spe_des = 'Here are odds that a set of ' + default_cards + " cards from " + default_decks + " decks contains the particular BS call from each category which has the highest chance of occuring, based on the " + default_known + " known cards. \nFor each of " + default_trials + " trials, the program chose a psuedorandom hand of " + default_known + ' cards from the ' + deck_word + " and call the most likely BS call from each combination. For example, when the hand contained a large number of fives, the program called 4 of a kind fives rather than 4 of a kind sixes for the four of a kind combination. Then the program added a psuedorandom set of " + remaining + " cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards.";
     var best_des = 'Here are BS calls which have the highest chance of being true, given  a set of ' + default_cards + " cards from " + default_decks + " decks which includes the hand " + default_cards.toString() + " selected above. \nFor each of " + default_trials + " trials, the program added a psuedorandom set of  " + remaining + " cards to the hand and checked for the existance of each call. \nIf a particular call is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards.";
     var gen_des = 'Here are odds that a set of ' + default_cards + " cards from the " + deck_word + " contains each BS combination (four of a kind, any flush, any straight, etc). \nFor each of " + default_trials + " trials, the program chose a psuedorandom set of " + default_cards + ' cards from the ' + deck_word + " and judged whether the set contained each particular combition. \nIf a particular combination is not shown, it means the program found the combination less than .01% of the time. Keep in mind that these odds assume that 2's are wild cards.";
+    var bs_desc = 'Above is the chance that the call is valid.';
     var main = '';
 
     switch (this.state.page) {
@@ -1603,6 +2163,19 @@ var Calculator = function (_React$Component6) {
             description: best_des })
         );
         break;
+      case 'isBS':
+        main = React.createElement(
+          'div',
+          null,
+          deck_opts,
+          React.createElement(Call_Picker, null),
+          React.createElement(Hand_Options, null),
+          run_button,
+          React.createElement(Bar_Graph, { data: this.state.data,
+            name: 'Validity of Call',
+            description: bs_desc })
+        );
+        break;
     }
 
     return React.createElement(
@@ -1617,13 +2190,13 @@ var Calculator = function (_React$Component6) {
   return Calculator;
 }(React.Component);
 
-var CardIcon = function (_React$Component7) {
-  _inherits(CardIcon, _React$Component7);
+var CardIcon = function (_React$Component9) {
+  _inherits(CardIcon, _React$Component9);
 
   function CardIcon() {
     _classCallCheck(this, CardIcon);
 
-    return _possibleConstructorReturn(this, _React$Component7.apply(this, arguments));
+    return _possibleConstructorReturn(this, _React$Component9.apply(this, arguments));
   }
 
   CardIcon.prototype.render = function render() {
@@ -1677,18 +2250,18 @@ var CardIcon = function (_React$Component7) {
   return CardIcon;
 }(React.Component);
 
-var NavBar = function (_React$Component8) {
-  _inherits(NavBar, _React$Component8);
+var NavBar = function (_React$Component10) {
+  _inherits(NavBar, _React$Component10);
 
   function NavBar() {
     _classCallCheck(this, NavBar);
 
-    var _this8 = _possibleConstructorReturn(this, _React$Component8.call(this));
+    var _this10 = _possibleConstructorReturn(this, _React$Component10.call(this));
 
-    _this8.state = {
+    _this10.state = {
       page: 'about'
     };
-    return _this8;
+    return _this10;
   }
 
   NavBar.prototype.onPageChanged = function onPageChanged(newPage) {
@@ -1729,6 +2302,11 @@ var NavBar = function (_React$Component8) {
           'a',
           { className: this.state.page == 'play' ? active : reg, onClick: this.onPageChanged.bind(this, 'play') },
           'BestPlay'
+        ),
+        React.createElement(
+          'a',
+          { className: this.state.page == 'isBS' ? active : reg, onClick: this.onPageChanged.bind(this, 'isBS') },
+          'BSChecker'
         )
       )
     );
@@ -1737,13 +2315,13 @@ var NavBar = function (_React$Component8) {
   return NavBar;
 }(React.Component);
 
-var HandCardIcon = function (_React$Component9) {
-  _inherits(HandCardIcon, _React$Component9);
+var HandCardIcon = function (_React$Component11) {
+  _inherits(HandCardIcon, _React$Component11);
 
   function HandCardIcon() {
     _classCallCheck(this, HandCardIcon);
 
-    return _possibleConstructorReturn(this, _React$Component9.call(this));
+    return _possibleConstructorReturn(this, _React$Component11.call(this));
   }
 
   HandCardIcon.prototype.clicked = function clicked() {
@@ -1761,13 +2339,13 @@ var HandCardIcon = function (_React$Component9) {
   return HandCardIcon;
 }(React.Component);
 
-var HandCardSetIcon = function (_React$Component10) {
-  _inherits(HandCardSetIcon, _React$Component10);
+var HandCardSetIcon = function (_React$Component12) {
+  _inherits(HandCardSetIcon, _React$Component12);
 
   function HandCardSetIcon() {
     _classCallCheck(this, HandCardSetIcon);
 
-    return _possibleConstructorReturn(this, _React$Component10.apply(this, arguments));
+    return _possibleConstructorReturn(this, _React$Component12.apply(this, arguments));
   }
 
   HandCardSetIcon.prototype.render = function render() {
@@ -1785,13 +2363,13 @@ var HandCardSetIcon = function (_React$Component10) {
   return HandCardSetIcon;
 }(React.Component);
 
-var CardSetIcon = function (_React$Component11) {
-  _inherits(CardSetIcon, _React$Component11);
+var CardSetIcon = function (_React$Component13) {
+  _inherits(CardSetIcon, _React$Component13);
 
   function CardSetIcon() {
     _classCallCheck(this, CardSetIcon);
 
-    return _possibleConstructorReturn(this, _React$Component11.apply(this, arguments));
+    return _possibleConstructorReturn(this, _React$Component13.apply(this, arguments));
   }
 
   CardSetIcon.prototype.render = function render() {
@@ -1807,13 +2385,13 @@ var CardSetIcon = function (_React$Component11) {
   return CardSetIcon;
 }(React.Component);
 
-var Footer = function (_React$Component12) {
-  _inherits(Footer, _React$Component12);
+var Footer = function (_React$Component14) {
+  _inherits(Footer, _React$Component14);
 
   function Footer() {
     _classCallCheck(this, Footer);
 
-    return _possibleConstructorReturn(this, _React$Component12.apply(this, arguments));
+    return _possibleConstructorReturn(this, _React$Component14.apply(this, arguments));
   }
 
   Footer.prototype.render = function render() {
@@ -1861,186 +2439,6 @@ var Footer = function (_React$Component12) {
   };
 
   return Footer;
-}(React.Component);
-
-var tut1 = new Card_Set();
-tut1.add(new Card(3, 2));
-tut1.add(new Card(7, 0));
-tut1.add(new Card(8, 0));
-tut1.add(new Card(9, 1));
-tut1.add(new Card(0, 3));
-tut1.add(new Card(11, 2));
-tut1.add(new Card(12, 1));
-
-var tut2 = new Card_Set();
-tut2.add(new Card(0, 3));
-tut2.add(new Card(0, 2));
-tut2.add(new Card(11, 1));
-tut2.add(new Card(12, 3));
-tut2.add(new Card(12, 2));
-tut2.add(new Card(12, 1));
-
-var tut3 = new Card_Set();
-tut3.add(new Card(0, 3));
-tut3.add(new Card(1, 3));
-tut3.add(new Card(4, 3));
-tut3.add(new Card(10, 3));
-tut3.add(new Card(11, 3));
-tut3.add(new Card(12, 3));
-
-var tut4 = new Card_Set();
-tut4.add(new Card(0, 3));
-tut4.add(new Card(1, 1));
-tut4.add(new Card(1, 3));
-tut4.add(new Card(2, 2));
-tut4.add(new Card(7, 1));
-
-var Rules = function (_React$Component13) {
-  _inherits(Rules, _React$Component13);
-
-  function Rules() {
-    _classCallCheck(this, Rules);
-
-    return _possibleConstructorReturn(this, _React$Component13.apply(this, arguments));
-  }
-
-  Rules.prototype.render = function render() {
-    return React.createElement(
-      'div',
-      { className: 'rules jumbotron' },
-      React.createElement(
-        'h1',
-        null,
-        'How To'
-      ),
-      React.createElement(
-        'h3',
-        null,
-        'Rules'
-      ),
-      React.createElement(
-        'ul',
-        null,
-        React.createElement(
-          'li',
-          null,
-          'Every player starts with 2 cards.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'The players take turns going clockwise. Each turn, a player can call a higher hand or call BS on the previously called hand.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'The player who lost a card gets to go first, or if that player is out, the next player goes first.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'Players may only see their own hand but are calling hands regarding the cards pooled together by all players.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'When a player calls BS, all players reveal their cards and sees whether the hand can be formed from 5 or more of the total cards'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'If the hand exists, the BS failed and the player who called BS gains a card.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'If the hand doesn\'t exist, the BS succeeded and the player who called the hand gains a card.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'The person who lost starts the next round.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'A player is out when they have 6 cards in their hand.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'The game continues until only one player is left.'
-        )
-      ),
-      React.createElement(
-        'h3',
-        null,
-        'Hands'
-      ),
-      React.createElement(
-        'ul',
-        null,
-        React.createElement(
-          'li',
-          null,
-          'Jokers are not part of the deck.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          '2\'s are wild cards which can be substituted for any rank or suit.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'All regular poker hands are valid.'
-        ),
-        React.createElement(
-          'li',
-          null,
-          'Straights, flushes, straight flushes, and of a kinds can extend beyond 5 cards'
-        )
-      ),
-      React.createElement(
-        'h3',
-        null,
-        'Examples'
-      ),
-      React.createElement(
-        'ul',
-        null,
-        React.createElement(
-          'li',
-          null,
-          ' The following contains a 6 long straight Ace high, because the wild card 2 can act as a queen.',
-          React.createElement(CardSetIcon, { cards: tut1.cards })
-        ),
-        React.createElement('br', null),
-        React.createElement(
-          'li',
-          null,
-          ' The following does not contain a full house, 3 on 9. The wild card may act as either the third 3 or the second 9, but it cannot be both.',
-          React.createElement(CardSetIcon, { cards: tut4.cards })
-        ),
-        React.createElement('br', null),
-        React.createElement(
-          'li',
-          null,
-          ' The following contains an Ace five of a kind, thanks to double wilds.',
-          React.createElement(CardSetIcon, { cards: tut2.cards })
-        ),
-        React.createElement('br', null),
-        React.createElement(
-          'li',
-          null,
-          ' The following does not contain a hearts flush, Queen high. While there are enough hearts, only 4 are capable of being equal or below Queen (2, 3, 6, and Q).',
-          React.createElement(CardSetIcon, { cards: tut3.cards })
-        )
-      )
-    );
-  };
-
-  return Rules;
 }(React.Component);
 
 ReactDOM.render(React.createElement(Calculator, null), document.getElementById('app'));
