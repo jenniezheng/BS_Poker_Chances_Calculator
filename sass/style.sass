@@ -1,0 +1,166 @@
+html,body
+  width: 100%
+  height: 100%
+  margin: 0px
+  padding: 0px
+  overflow-x: hidden
+
+//gradients
+@mixin gradient_horizontal($colors...)
+  background: blue /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(left, $colors) /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(right, $colors) /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(right, $colors) /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to right, $colors) /* Standard syntax */
+
+.jumbotron
+  background: lighten(#4A525A,50%)
+  margin-bottom: 0
+  padding: 3%  5%  3%  5%
+  h1
+    color: #24272B
+  p
+    color: #24272B
+
+.card
+  background: #24272B
+  width: 50px
+  text-align: center
+  padding: 1px
+  margin: 1px
+  p
+    color: #24272B
+    font-size: 2em
+    margin: 0
+
+
+.navbar
+  background: #004BA8
+  padding: 3%  5%  0%  5%
+
+.navbar-brand
+  font-size: 2em
+  background: #07070A
+  color: #3E78B2 !important
+  padding: 0 .5em 0 .5em
+
+.navbar-nav
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  justify-content: flex-end
+  .nav-link
+    color: lighten(#3E78B2,25%) !important
+    font-size: 1.2em
+    @media screen and (max-width: 700px)
+      font-size: .85em
+    &:hover
+      color: lighten(#3E78B2,60%)  !important
+  a
+    margin-left: 10px
+  .active
+    color: lighten(#3E78B2,100%) !important
+
+
+
+.footer
+  background: #004BA8
+  padding: 3%  5%  0%  5%
+  color: lighten(#3E78B2,25%)
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+  h3
+    font-size: .9em
+    display: inline-block
+  .footer_links
+    display: flex
+    flex-direction: row
+    justify-content: flex-end
+    margin-right: 0
+    li
+      margin-left: 1em
+      a:hover
+        .fa
+          color: lighten(#3E78B2,60%)  !important
+  .fa
+    color: lighten(#3E78B2,25%)
+
+.bar
+  $color: #004BA8
+  @include gradient_horizontal(darken($color,40%),lighten($color,40%))
+  white-space: nowrap
+  padding-left: 10px
+  border-radius: 40px
+  text-align: left
+  box-sizing: border-box
+.graph
+  padding: 1em 0 1em 0
+.bar_graph
+  padding: 10% 5%
+  padding-top: 3em
+  background: #24272B
+  h1, p
+    color: lighten(#3E78B2,40%)  !important
+  .bar_description
+    margin-top: 4px
+    font-size: 1.2em
+@media screen and (max-width: 700px)
+  .bar
+    font-size: .85em
+@media screen and (max-width: 550px)
+  .bar
+    font-size: .65em
+.bar_container
+  //skill bar decoration
+  //might consider making the skill bars a bit fancier
+  line-height: 30px
+  margin-bottom: 2px
+  color: white
+  font-size: 1.4em
+
+
+.num_input
+  width: 90px !important
+
+.card
+  background: white
+  p
+    color: #24272B
+
+
+.cardset
+  background: none
+  padding-bottom: 1px
+  display: flex
+  flex-direction: row
+  justify-content: center
+  margin-left: auto
+.hand_options
+  padding: 5%
+.hand_choices
+  #myhand
+    .cardset
+      flex-wrap: wrap
+.card
+  width: 25px
+  margin: 1px
+  p
+    font-size: 1em
+@media screen and (min-width: 750px)
+  .card
+    width: 50px
+    margin: 2px
+    p
+    font-size: 2em
+
+.form-inline
+  label.mr-sm-2
+    font-size: 1em !important
+  @media screen and (max-width: 650px)
+    label.mr-sm-2
+      font-size: .7em !important
+    select.custom-select,input.mr-sm-2
+      font-size: .7em !important
+    input.mr-sm-2
+      width: 70px !important
